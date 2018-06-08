@@ -12,7 +12,7 @@ app.use('/css',express.static(__dirname + '/css'));
 app.use('/src',express.static(__dirname + '/src'));
 app.use('/assets',express.static(__dirname + '/assets'));
 
-server.listen(port, function(){ // Listens to port 8081
+server.listen(port, function(){
     console.log('Server listening on port :', port);
 });
 
