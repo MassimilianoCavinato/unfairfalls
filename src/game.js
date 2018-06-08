@@ -26,7 +26,7 @@ var player;
 
 
 function preload(){
-    game.load.image('player', 'http://localhost:5000/assets/salmon.png');
+    game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/salmon.png');
 }
 
 function create(){
@@ -42,10 +42,10 @@ function update(){
 }
 
 
-// function render() {
-//     game.debug.bodyInfo(player, 32, 32);
-//     game.debug.body(player);
-// }
+function render() {
+    game.debug.bodyInfo(player, 32, 32);
+    game.debug.body(player);
+}
 
 function createPlayer(){
     player = game.add.sprite(400, 300, 'player');
@@ -56,48 +56,6 @@ function createPlayer(){
 }
 
 function controlPlayer(){
-    player.rotation = game.physics.arcade.moveToPointer(player, 0, game.input.activePointer, 280);
+    player.rotation = game.physics.arcade.moveToPointer(player, 2000, game.input.activePointer, 240);
     player.scale.y = player.x > game.input.x ? - Math.abs(player.scale.y) : Math.abs(player.scale.y);
-
-    // if(speed > 1400){
-    //     speed = 1400;
-    // }
-    // if(speed < 200){
-    //     speed = 200;
-    // }
-    // if(spaceKey.justDown && stamina > 10){
-    //     speed = 400;
-    // }
-    //
-    // if(spaceKey.isDown){
-    //
-    //     if(stamina > 0){
-    //         speed += 25;
-    //         stamina--;
-    //     }
-    //     else{
-    //         if(speed > 200){
-    //             speed -= 50;
-    //         }
-    //     }
-    // }
-    // else{
-    //     if(speed > 200){
-    //         speed -= 50;
-    //     }
-    //
-    //     if(stamina < 50){
-    //         stamina += 0.5;
-    //     }
-    // }
-    //
-    // if(Math.abs(player.x - game.input.x) < 40 && Math.abs(player.y - game.input.y) < 40){
-    //     game.physics.arcade.moveToPointer(player, 0);
-    // }
-    // else{
-    //     game.physics.arcade.moveToPointer(player, speed);
-    //     player.rotation = game.physics.arcade.angleToPointer(player);
-    //
-    // }
-    // console.log(stamina, speed);
 }
