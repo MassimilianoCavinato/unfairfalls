@@ -11,8 +11,8 @@
 //     game.stage.disableVisibilityChange = true;
 // };
 var game = new Phaser.Game(
-    800,
-    600,
+    '100%',
+    '100%',
     Phaser.CANVAS,
     document.getElementById('unfairfalls'),
     {
@@ -36,7 +36,7 @@ function create(){
     game.physics.startSystem(Phaser.Physics.P2JS);
 
     createPlayer();
-    // game.stage.backgroundColor = '#ccffff';
+    game.stage.backgroundColor = '#0000A0';
 }
 
 function update(){
@@ -45,11 +45,19 @@ function update(){
 
 
 function createPlayer(){
-    poly = new Phaser.Polygon([ new Phaser.Point(200, 100), new Phaser.Point(350, 100), new Phaser.Point(375, 200), new Phaser.Point(150, 200) ]);
+
     player = game.add.sprite(400, 300, 'player');
     player.anchor.setTo(0.5);
     player.scale.setTo(0.12,0.12);
+
+    //label
+    var style = { font: "120px Arial", fill: "#ffffff" };
+    var playerName = game.add.text(-300, -300, "Player Name", style);
+
+
     game.physics.p2.enable([ player ], true);
+    player.addChild(playerName);
+    //hitbox
     player.body.clearShapes();
     poly = [{
             "shape": [ 0,40, 0,20, 10,28, 10, 33 ]
@@ -62,7 +70,7 @@ function createPlayer(){
 }
 
 function controlPlayer(){
-    player.body.rotation = game.physics.arcade.moveToPointer(player, 60, game.input.activePointer, 200);
+    player.body.rotation = game.physics.arcade.moveToPointer(player, 60, game.input.activePointer, 400);
     player.scale.y = player.x > game.input.x ? - Math.abs(player.scale.y) : Math.abs(player.scale.y);
 }
 
