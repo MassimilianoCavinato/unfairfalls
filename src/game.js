@@ -55,6 +55,7 @@ function create(){
     socket = io();
 
     game.physics.startSystem(Phaser.Physics.P2JS);
+    game.stage.disableVisibilityChange = true;
     otherPlayers = game.add.group();
 
     socket.on('currentPlayers', function (players) {
