@@ -60,6 +60,15 @@ function addPlayer(playerId){
     player = game.add.sprite(400, 300, 'player');
     player.anchor.setTo(0.5, 0.5);
     player.scale.setTo(0.12,0.12);
+    player.oldPos = {
+        id: socket.id,
+        x: 0,
+        y: 0,
+        cx: 0,
+        cy: 0,
+        rotation: 0,
+        speed: 0
+    };
     game.physics.p2.enable([ player ], true);
 
     player.body.clearShapes();
@@ -87,49 +96,32 @@ function addOtherPlayer(playerId){
 }
 
 function controlPlayer(){
-    player.body.rotation = game.physics.arcade.moveToPointer(player, 60, game.input.activePointer, 400);
-    if(game.input.x > player.x){
-        player.scale.y = Math.abs(player.scale.y);
-    }else{
-        player.scale.y = - Math.abs(player.scale.y);
-    }
-    var new_timestamp = Date.now();
+    player.body.rotation = game.physics.arcade.moveToXY(player, game.input.activePointer.x, game.input.activePointer.y, 60, 500);
+    player.scale.y = game.input.x < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
+    // if(game.input.x > player.x){
+    //     player.scale.y = Math.abs(player.scale.y);
+    // }else{
+    //     player.scale.y = - Math.abs(player.scale.y);
+    // }
 
-    if(new_timestamp - player.timestamp > 20){
-        player.timestamp = new_timestamp;
-        socket.emit('playerAction', {
-            id: player.id,
-            x: player.body.x,
-            y: player.body.y,
-            cx: game.input.activePointer.x,
-            cy: game.input.activePointer.y,
-            rotation: player.body.rotation,
-            speed:  Math.sqrt(Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2))
-        });
+    if(game.input.activePointer.x != player.oldPos.cx || game.input.activePointer.y != player.oldPos.y){
         player.oldPos = {
-            x: player.body.x,
-            y: player.body.y,
             cx: game.input.activePointer.x,
             cy: game.input.activePointer.y
         };
+        socket.emit('playerAction', {
+            id: player.id,
+            cx: game.input.activePointer.x,
+            cy: game.input.activePointer.y,
+            speed:  Math.sqrt(Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2))
+        });
+
     }
 }
 
 function controlOtherPlayer(otherPlayer, playerData){
-
-    otherPlayer.body.rotation = playerData.rotation;
-    otherPlayer.body.x = playerData.x;
-    otherPlayer.body.y = playerData.y;
-    otherPlayer.body.speed = playerData.speed;
-    // }
-
-    game.physics.arcade.moveToXY(otherPlayer, playerData.cx, playerData.cy, playerData.speed);
-
-    if(playerData.cx > playerData.x){
-        otherPlayer.scale.y = Math.abs(otherPlayer.scale.y);
-    }else{
-        otherPlayer.scale.y = - Math.abs(otherPlayer.scale.y);
-    }
+    otherPlayer.body.rotation = game.physics.arcade.moveToXY(otherPlayer, playerData.cx, playerData.cy, playerData.speed);
+    otherPlayer.scale.y = playerData.cx < playerData.x ? - Math.abs(otherPlayer.scale.y) :  Math.abs(otherPlayer.scale.y);
 }
 
 function render() {
