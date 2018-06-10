@@ -41,7 +41,6 @@ function create(){
     socket = io();
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.p2.setImpactEvents(true);
-    // game.physics.p2.restitution = 0.8;
     game.stage.disableVisibilityChange = true;
     playerCollisionGroup = game.physics.p2.createCollisionGroup();
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
@@ -96,7 +95,7 @@ function controlPlayer(){
     }
     var new_timestamp = Date.now();
 
-    if(new_timestamp - player.timestamp > 50){
+    if(new_timestamp - player.timestamp > 20){
         player.timestamp = new_timestamp;
         socket.emit('playerAction', {
             id: player.id,
@@ -114,20 +113,15 @@ function controlPlayer(){
             cy: game.input.activePointer.y
         };
     }
-
-
 }
 
 function controlOtherPlayer(otherPlayer, playerData){
 
     otherPlayer.body.rotation = playerData.rotation;
-    if(Math.abs(otherPlayer.body.x - playerData.x) > 50 ){
-        otherPlayer.body.x = playerData.x;
-    }
-
-    if(Math.abs(otherPlayer.body.y - playerData.y) > 50 ){
-        otherPlayer.body.y = playerData.y;
-    }
+    otherPlayer.body.x = playerData.x;
+    otherPlayer.body.y = playerData.y;
+    otherPlayer.body.speed = playerData.speed;
+    // }
 
     game.physics.arcade.moveToXY(otherPlayer, playerData.cx, playerData.cy, playerData.speed);
 
