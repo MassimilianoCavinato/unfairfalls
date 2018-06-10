@@ -14,6 +14,7 @@ app.use('/css',express.static(__dirname + '/css'));
 app.use('/src',express.static(__dirname + '/src'));
 app.use('/assets',express.static(__dirname + '/assets'));
 
+
 io.on('connection', function (socket) {
     //CONNECTION
     players[socket.id] = {
