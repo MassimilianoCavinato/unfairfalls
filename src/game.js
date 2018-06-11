@@ -10,10 +10,12 @@ var game = new Phaser.Game(
         render: render
     }
 );
+var cursor;
 var player;
 var otherPlayers;
 var playerCollisionGroup;
 var otherPlayersRef = {};
+var stamina = 200;
 
 playerPolyRight = [
     {
@@ -33,19 +35,21 @@ playerPolyRight = [
 
 function preload(){
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/salmon.png');
-    game.load.image('background', 'http://localhost:5000/assets/grid.png');
+    game.load.image('background', 'http://unfairfalls.herokuapp.com/assets/grid.png');
+    game.load.image('water', 'http://unfairfalls.herokuapp.com/assets/water.png');
 }
 
 function create(){
 
     socket = io();
-    game.world.setBounds(0, 0, 6000, 6000);
-    game.add.tileSprite(0, 0, 6000, 6000, 'background');
+    cursor = game.input.mousePointer;
+    game.world.setBounds(0, 0, 2000, 2000);
+    game.add.tileSprite(0, 0, 2000, 1000, 'background');
+    game.add.tileSprite(0, 1000, 2000, 2000, 'water');
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.p2.setImpactEvents(true);
-
+    game.physics.p2.gravity.y = 500;
     game.stage.disableVisibilityChange = true;
-
     playerCollisionGroup = game.physics.p2.createCollisionGroup();
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
@@ -53,6 +57,7 @@ function create(){
 }
 
 function update(){
+    console.log(0);
     if(typeof(player) !== 'undefined'){
         controlPlayer();
     }
@@ -99,24 +104,33 @@ function addOtherPlayer(playerId){
 }
 
 function controlPlayer(){
+
     var cx = game.input.activePointer.x+game.camera.x;
     var cy = game.input.mousePointer.y+game.camera.y;
-    player.body.rotation = game.physics.arcade.moveToXY(player, cx, cy, 400);
+    let pointerDistance = Math.sqrt(Math.pow(cursor.worldX - player.body.x, 2) + Math.pow(cursor.worldY - player.body.y, 2));
+    let speed = game.input.activePointer.isDown ? 900 : 450;
+    player.body.rotation = game.physics.arcade.angleToPointer(player);
     player.scale.y = cx < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
 
-    if(cx != player.oldPos.cx || cy != player.oldPos.cy){
-        player.oldPos = {
-            cx: cx,
-            cy: cy
-        };
-        socket.emit('playerAction', {
-            id: player.id,
-            cx: cx,
-            cy: cy,
-            speed:  Math.sqrt(Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2))
-        });
-
+    if(player.y < 1000){
+        player.body.speed = 0;
     }
+    else{
+        if(pointerDistance > 35){
+            game.physics.arcade.moveToXY(player, cx, cy, speed);
+        }
+        else{
+            player.body.velocity.y = 0;
+            player.body.velocity.x = 0;
+        }
+    }
+    
+    socket.emit('playerAction', {
+        id: player.id,
+        cx: cx,
+        cy: cy,
+        speed:  Math.sqrt(Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2))
+    });
 }
 
 function controlOtherPlayer(otherPlayer, playerData){
