@@ -124,9 +124,11 @@ function controlPlayer(){
             player.body.velocity.x = 0;
         }
     }
-    
+
     socket.emit('playerAction', {
         id: player.id,
+        x: player.body.x,
+        y: player.body.y,
         cx: cx,
         cy: cy,
         speed:  Math.sqrt(Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2))
@@ -134,6 +136,8 @@ function controlPlayer(){
 }
 
 function controlOtherPlayer(otherPlayer, playerData){
+    otherPlayer.body.x = playerData.x,
+    otherPlayer.body.y = playerData.y,
     otherPlayer.body.rotation = game.physics.arcade.moveToXY(otherPlayer, playerData.cx, playerData.cy, playerData.speed);
     otherPlayer.scale.y = playerData.cx < playerData.x ? - Math.abs(otherPlayer.scale.y) :  Math.abs(otherPlayer.scale.y);
 }
