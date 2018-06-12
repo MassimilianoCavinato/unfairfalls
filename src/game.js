@@ -197,6 +197,7 @@ function render() {
 
     game.debug.cameraInfo(game.camera, 32, 32);
     game.debug.pointer(pointer);
+    game.debug.pointer(game.input.activePointer);
     // if(typeof player !== 'undefined'){
     //     game.debug.spriteInfo(player, 500, 32);
     // }
