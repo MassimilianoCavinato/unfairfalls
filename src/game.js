@@ -69,7 +69,7 @@ function update(){
 
 function addPlayer(playerId){
 
-    player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+    player = game.add.sprite(game.world.centerX, game.world.centerY+500, 'player');
     player.id = playerId;
     player.timestamp = Date.now();
     player.anchor.setTo(0.5);
