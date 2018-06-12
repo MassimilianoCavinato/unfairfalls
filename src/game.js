@@ -167,7 +167,7 @@ function waterPhysics(){
         }
         player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
         player.body.rotation = game.physics.arcade.angleToPointer(player);
-        game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, speed);
+        game.physics.arcade.moveToPointer(player, speed, pointer);
     }
     else{
         player.body.speed = 0;
