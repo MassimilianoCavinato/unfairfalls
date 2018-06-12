@@ -1,6 +1,6 @@
 var game = new Phaser.Game(
-    800,
-    600,
+    '100%',
+    '100%',
     Phaser.CANVAS,
     document.getElementById('unfairfalls'),
     {
