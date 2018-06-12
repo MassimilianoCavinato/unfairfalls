@@ -36,7 +36,7 @@ function preload(){
 function create(){
 
     socket = io();
-    pointer = game.input.mousePointer;
+    pointer = game.input.activePointer;
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.world.setBounds(0, 0, 2000, 2000);
     // game.physics.p2.setImpactEvents(true);
@@ -197,7 +197,7 @@ function render() {
 
     game.debug.cameraInfo(game.camera, 32, 32);
     game.debug.pointer(pointer);
-    game.debug.pointer(game.input.activePointer);
+    // game.debug.pointer(game.input.activePointer);
     // if(typeof player !== 'undefined'){
     //     game.debug.spriteInfo(player, 500, 32);
     // }
