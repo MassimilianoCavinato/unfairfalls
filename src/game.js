@@ -10,10 +10,12 @@ var game = new Phaser.Game(
         render: render
     }
 );
-var cursor;
+
+var pointer;
 var player;
 var otherPlayers;
-var playerCollisionGroup;
+var ground;
+var collisionGroup;
 var otherPlayersRef = {};
 var stamina = 200;
 
@@ -35,29 +37,36 @@ playerPolyRight = [
 
 function preload(){
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/salmon.png');
-    game.load.image('background', 'http://unfairfalls.herokuapp.com/assets/grid.png');
-    game.load.image('water', 'http://unfairfalls.herokuapp.com/assets/water.png');
+    game.load.image('background', 'https://unfairfalls.herokuapp.com/assets/grid.png');
+    game.load.image('ground', 'http://unfairfalls.herokuapp.com/assets/ground.png');
+    game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/water.png');
 }
 
 function create(){
 
     socket = io();
-    cursor = game.input.mousePointer;
+    pointer = game.input.activePointer;
+    game.physics.startSystem(Phaser.Physics.P2JS);
     game.world.setBounds(0, 0, 2000, 2000);
+    collisionGroup = game.physics.p2.createCollisionGroup();
     game.add.tileSprite(0, 0, 2000, 1000, 'background');
     game.add.tileSprite(0, 1000, 2000, 2000, 'water');
-    game.physics.startSystem(Phaser.Physics.P2JS);
+    ground = game.add.tileSprite(700, 700, 200, 20, 'ground');
+    game.physics.p2.enable([ ground ], true);
+    ground.body.data.gravityScale = 0;
+    ground.body.static = true;
+    ground.body.setCollisionGroup(collisionGroup);
+    ground.body.collides([collisionGroup]);
     game.physics.p2.setImpactEvents(true);
     game.physics.p2.gravity.y = 500;
     game.stage.disableVisibilityChange = true;
-    playerCollisionGroup = game.physics.p2.createCollisionGroup();
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
     game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
 }
 
 function update(){
-    console.log(0);
+    //should find a way to remove this check at each update
     if(typeof(player) !== 'undefined'){
         controlPlayer();
     }
@@ -83,9 +92,10 @@ function addPlayer(playerId){
     player.body.mass = 10;
     player.id = playerId;
     player.timestamp = Date.now();
-    player.body.setCollisionGroup(playerCollisionGroup);
-    player.body.collides([playerCollisionGroup]);
+    player.body.setCollisionGroup(collisionGroup);
+    player.body.collides([collisionGroup]);
     game.camera.follow(player);
+
 }
 
 function addOtherPlayer(playerId){
@@ -98,51 +108,103 @@ function addOtherPlayer(playerId){
     otherPlayer.body.mass = 10;
     otherPlayer.id = playerId;
     otherPlayers.add(otherPlayer);
-    otherPlayer.body.setCollisionGroup(playerCollisionGroup);
-    otherPlayer.body.collides([playerCollisionGroup]);
+    otherPlayer.body.setCollisionGroup(collisionGroup);
+    otherPlayer.body.collides([collisionGroup]);
+
+     //megahack, not sure if it is reliable, need to check what happens when player is destroyed on disconnection
     otherPlayersRef[playerId] = otherPlayers.children.length -1;
 }
 
 function controlPlayer(){
 
-    var cx = game.input.activePointer.x+game.camera.x;
-    var cy = game.input.mousePointer.y+game.camera.y;
-    let pointerDistance = Math.sqrt(Math.pow(cursor.worldX - player.body.x, 2) + Math.pow(cursor.worldY - player.body.y, 2));
-    let speed = game.input.activePointer.isDown ? 900 : 450;
-    player.body.rotation = game.physics.arcade.angleToPointer(player);
-    player.scale.y = cx < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
+    // Todo: create method to determine this boolean checking player overlaps with water map-tile
+    let inWater = player.body.y > 1050;
 
-    if(player.y < 1000){
-        player.body.speed = 0;
+    inWater ? waterPhysics() : airPhysics();
+
+    /*
+        The state object below is a snapshot of the player sent with web socket which will be then broadcasted to all other players.
+        This will probably change down the line, I don't think that all this data is necessary.
+        Also, this data should be encoded client side and decoded server side to make TCP traffic faster.
+    */
+    let state = {
+        id: player.id,
+        body: {
+            x: player.body.x,
+            y: player.body.y,
+            rotation: player.body.rotation,
+            velocity: {
+                x: player.body.velocity.x,
+                y: player.body.velocity.y
+            }
+        },
+        scale: {
+            y: player.scale.y
+        },
+        timestamp: Date.now()
+    };
+    socket.emit('playerAction', state);
+}
+
+function waterPhysics(){
+    /*  ========================================================================
+        WATER PHYSICS
+        ========================================================================
+        No gravity
+        Water friction ( body.damping )
+        Player moves in direction of the pointer
+        The bigger is the distance from the pointer and the faseter he moves, up to 800 max speed
+        When the pointer is close to the player, the sprite should stop smoothly and stop angling to avoid shaky animation
+    */
+    let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
+    player.body.data.gravityScale = 0;
+    player.body.damping = 0.9;
+    if(pointerDistance > 40){
+        let maxSpeed = 800;
+        let speed = pointerDistance*4;
+        if(speed > maxSpeed){
+            speed = maxSpeed;
+        }
+        player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
+        player.body.rotation = game.physics.arcade.angleToPointer(player);
+        game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, speed);
     }
     else{
-        if(pointerDistance > 35){
-            game.physics.arcade.moveToXY(player, cx, cy, speed);
-        }
-        else{
-            player.body.velocity.y = 0;
-            player.body.velocity.x = 0;
-        }
+        player.body.speed = 0;
     }
+}
 
-    socket.emit('playerAction', {
-        id: player.id,
-        x: player.body.x,
-        y: player.body.y,
-        cx: cx,
-        cy: cy,
-        speed:  Math.sqrt(Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2))
-    });
+
+
+function airPhysics(){
+    /*  ========================================================================
+        AIR PHYSICS
+        ========================================================================
+        Player is affected by game gravity
+        He can still angle in direction of the pointer but shouldn't have any control whatsoever the direction and speed.
+    */
+    let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
+    player.body.data.gravityScale = 1;
+    player.body.damping = 0;
+    player.body.speed = 0;
+    player.body.rotation = game.physics.arcade.angleToPointer(player);
+    player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
 }
 
 function controlOtherPlayer(otherPlayer, playerData){
-    otherPlayer.body.x = playerData.x,
-    otherPlayer.body.y = playerData.y,
-    otherPlayer.body.rotation = game.physics.arcade.moveToXY(otherPlayer, playerData.cx, playerData.cy, playerData.speed);
-    otherPlayer.scale.y = playerData.cx < playerData.x ? - Math.abs(otherPlayer.scale.y) :  Math.abs(otherPlayer.scale.y);
+    /*
+        Todo: create client side game prediction, interpolation etc to create the smoothest experience
+    */
+    otherPlayer.body.x = playerData.body.x,
+    otherPlayer.body.y = playerData.body.y,
+    otherPlayer.body.velocity.x = playerData.body.velocity.x,
+    otherPlayer.body.velocity.x = playerData.body.velocity.y,
+    otherPlayer.body.rotation = playerData.body.rotation,
+    otherPlayer.scale.y = playerData.scale.y;
 }
 
 function render() {
+
     game.debug.cameraInfo(game.camera, 32, 32);
     if(typeof player !== 'undefined'){
         game.debug.spriteInfo(player, 500, 32);
@@ -153,7 +215,7 @@ function handleSockets(){
 
     socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (playerId, index) {
-            playerId === socket.id ? addPlayer(players[playerId].id) : addOtherPlayer(players[playerId].id);
+            playerId === socket.id ? addPlayer(playerId) : addOtherPlayer(playerId);
         });
     });
 
@@ -162,11 +224,12 @@ function handleSockets(){
     });
 
     socket.on('disconnect', function (playerId) {
-        otherPlayers.children.forEach(function (otherPlayer) {
-            if (playerId === otherPlayer.id) {
-                otherPlayer.destroy();
-            }
-        });
+        otherPlayers.children[otherPlayersRef[playerData.id]].destroy();
+        // .forEach(function (otherPlayer) {
+        //     if (playerId === otherPlayer.id) {
+        //         otherPlayer.destroy();
+        //     }
+        // });
     });
 
     socket.on('playerActionFinished', function (playerData) {

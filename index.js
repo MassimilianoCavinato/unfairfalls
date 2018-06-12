@@ -17,34 +17,24 @@ app.use('/assets',express.static(__dirname + '/assets'));
 
 io.on('connection', function (socket) {
     //CONNECTION
-    players[socket.id] = {
-        id: socket.id,
-    }
-
-    // send the players object to the new player
+    players[socket.id] = { id: socket.id };
     socket.emit('currentPlayers', players);
-    // update all other players of the new player
     socket.broadcast.emit('newPlayer', players[socket.id].id);
+    console.log('User', socket.id, 'just connected!');
 
     //DISCONNECTION
     socket.on('disconnect', function () {
-        // remove this player from our players objec
         delete players[socket.id];
-        // emit a message to all players to remove this player
         io.emit('disconnect', socket.id);
-        console.log('user disconnected');
+        console.log('User', socket.id, 'just disconnected...');
     });
 
+    //ACTIONS
     socket.on('playerAction', function(playerData) {
         players[socket.id] = playerData;
         socket.broadcast.emit('playerActionFinished', players[socket.id]);
     });
 });
 
-server.listen(port, function(){
-    console.log('Server listening on port :', port);
-});
-
-app.get('/',function(req,res){
-    res.sendFile(__dirname+'/index.html');
-});
+server.listen(port, () => console.log('Server listening on port :', port));
+app.get('/', (req,res) => res.sendFile(__dirname+'/index.html'));
