@@ -196,9 +196,10 @@ function controlOtherPlayer(otherPlayer, playerData){
 function render() {
 
     game.debug.cameraInfo(game.camera, 32, 32);
-    if(typeof player !== 'undefined'){
-        game.debug.spriteInfo(player, 500, 32);
-    }
+    game.debug.pointer(pointer);
+    // if(typeof player !== 'undefined'){
+    //     game.debug.spriteInfo(player, 500, 32);
+    // }
 }
 
 function handleSockets(){
