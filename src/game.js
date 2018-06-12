@@ -18,51 +18,46 @@ var ground;
 var collisionGroup;
 var otherPlayersRef = {};
 var stamina = 200;
-
-playerPolyRight = [
-    {
-        "shape": [
-            0,40,
-            0,20,
-            10,28,
-            40,22,
-            62,28,
-            62,33,
-            42,40,
-            22,38,
-            10,33
-        ]
-    },
-];
-
+var playerMaterial;
+var waterMaterial;
+var groundMaterial;
+var contactMaterial;
 function preload(){
+    //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/salmon.png');
     game.load.image('background', 'https://unfairfalls.herokuapp.com/assets/grid.png');
     game.load.image('ground', 'http://unfairfalls.herokuapp.com/assets/ground.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/water.png');
+
+    //PHYSICS & POLYGONS
+    game.load.physics('physicsData', 'assets/poly_player.json');
 }
 
 function create(){
 
     socket = io();
-    pointer = game.input.activePointer;
+    pointer = game.input.mousePointer;
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.world.setBounds(0, 0, 2000, 2000);
+    // game.physics.p2.setImpactEvents(true);
+    game.physics.p2.gravity.y = 600;
+    game.stage.disableVisibilityChange = true;
+
     collisionGroup = game.physics.p2.createCollisionGroup();
+
+    // GROUND
     game.add.tileSprite(0, 0, 2000, 1000, 'background');
     game.add.tileSprite(0, 1000, 2000, 2000, 'water');
-    ground = game.add.tileSprite(700, 700, 200, 20, 'ground');
+    ground = game.add.tileSprite(800, 900, 500, 50, 'ground');
     game.physics.p2.enable([ ground ], true);
     ground.body.data.gravityScale = 0;
     ground.body.static = true;
     ground.body.setCollisionGroup(collisionGroup);
-    ground.body.collides([collisionGroup]);
-    game.physics.p2.setImpactEvents(true);
-    game.physics.p2.gravity.y = 500;
-    game.stage.disableVisibilityChange = true;
+    ground.body.collides(collisionGroup);
+
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
-    game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
+
 }
 
 function update(){
@@ -73,43 +68,36 @@ function update(){
 }
 
 function addPlayer(playerId){
+
     player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-    player.anchor.setTo(0.5, 0.5);
-    player.scale.setTo(0.12,0.12);
-    player.oldPos = {
-        id: socket.id,
-        x: 0,
-        y: 0,
-        cx: 0,
-        cy: 0,
-        rotation: 0,
-        speed: 0
-    };
-    game.physics.p2.enable([ player ], true);
-    player.body.clearShapes();
-    player.body.loadPolygon(null, playerPolyRight);
-    player.body.collideWorldBounds=true;
-    player.body.mass = 10;
     player.id = playerId;
     player.timestamp = Date.now();
+    player.anchor.setTo(0.5);
+
+    game.physics.p2.enable([ player ], true);
+
+
+    player.body.clearShapes();
+    player.body.loadPolygon('physicsData', 'Player');
     player.body.setCollisionGroup(collisionGroup);
-    player.body.collides([collisionGroup]);
+    player.body.collides(collisionGroup);
+
     game.camera.follow(player);
 
 }
 
 function addOtherPlayer(playerId){
+
     otherPlayer = game.add.sprite(400, 300, 'player');
-    otherPlayer.anchor.setTo(0.5, 0.5);
-    game.physics.p2.enable([ otherPlayer ], true);
-    otherPlayer.scale.setTo(0.12,0.12);
-    otherPlayer.body.clearShapes();
-    otherPlayer.body.loadPolygon(null, playerPolyRight);
-    otherPlayer.body.mass = 10;
     otherPlayer.id = playerId;
-    otherPlayers.add(otherPlayer);
+    otherPlayer.anchor.setTo(0.5);
+    game.physics.p2.enable([ otherPlayer ], true);
+    otherPlayer.body.clearShapes();
+    otherPlayer.body.loadPolygon('physicsData', 'Player');
     otherPlayer.body.setCollisionGroup(collisionGroup);
-    otherPlayer.body.collides([collisionGroup]);
+    otherPlayer.body.collides(collisionGroup);
+    otherPlayer.body.data.gravityScale = 0;
+    otherPlayers.add(otherPlayer);
 
      //megahack, not sure if it is reliable, need to check what happens when player is destroyed on disconnection
     otherPlayersRef[playerId] = otherPlayers.children.length -1;
@@ -119,7 +107,6 @@ function controlPlayer(){
 
     // Todo: create method to determine this boolean checking player overlaps with water map-tile
     let inWater = player.body.y > 1050;
-
     inWater ? waterPhysics() : airPhysics();
 
     /*
@@ -144,9 +131,11 @@ function controlPlayer(){
         timestamp: Date.now()
     };
     socket.emit('playerAction', state);
+
 }
 
 function waterPhysics(){
+
     /*  ========================================================================
         WATER PHYSICS
         ========================================================================
@@ -158,19 +147,20 @@ function waterPhysics(){
     */
     let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
     player.body.data.gravityScale = 0;
-    player.body.damping = 0.9;
-    if(pointerDistance > 40){
-        let maxSpeed = 800;
-        let speed = pointerDistance*4;
+
+    if(pointerDistance > 50){
+        let maxSpeed = 700;
+        let speed = pointerDistance*3;
         if(speed > maxSpeed){
             speed = maxSpeed;
         }
         player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
         player.body.rotation = game.physics.arcade.angleToPointer(player);
-        game.physics.arcade.moveToPointer(player, speed, pointer);
+        game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, speed);
     }
     else{
         player.body.speed = 0;
+        player.body.damping = 0.95;
     }
 }
 
@@ -187,7 +177,7 @@ function airPhysics(){
     player.body.data.gravityScale = 1;
     player.body.damping = 0;
     player.body.speed = 0;
-    player.body.rotation = game.physics.arcade.angleToPointer(player);
+    // player.body.rotation = game.physics.arcade.angleToPointer(player);
     player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
 }
 
@@ -219,6 +209,12 @@ function handleSockets(){
         });
     });
 
+    socket.on('playerActionFinished', function (playerData) {
+        if(playerData.id !== socket.id){
+            controlOtherPlayer(otherPlayers.children[otherPlayersRef[playerData.id]], playerData);
+        }
+    });
+
     socket.on('newPlayer', function (playerId) {
         addOtherPlayer(playerId);
     });
@@ -232,9 +228,5 @@ function handleSockets(){
         // });
     });
 
-    socket.on('playerActionFinished', function (playerData) {
-        if(playerData.id !== socket.id){
-            controlOtherPlayer(otherPlayers.children[otherPlayersRef[playerData.id]], playerData);
-        }
-    });
+
 }
