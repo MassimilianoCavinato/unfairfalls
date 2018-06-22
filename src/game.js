@@ -1,6 +1,6 @@
 var game = new Phaser.Game(
-    '100%',
-    '100%',
+    "100%",
+    "100%",
     Phaser.CANVAS,
     document.getElementById('unfairfalls'),
     {
@@ -14,50 +14,65 @@ var game = new Phaser.Game(
 var pointer;
 var player;
 var otherPlayers;
-var ground;
 var collisionGroup;
+var waterGroup;
 var otherPlayersRef = {};
-var stamina = 200;
-var playerMaterial;
-var waterMaterial;
-var groundMaterial;
-var contactMaterial;
-function preload(){
-    //IMAGES
-    game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/salmon.png');
-    game.load.image('background', 'https://unfairfalls.herokuapp.com/assets/grid.png');
-    game.load.image('ground', 'http://unfairfalls.herokuapp.com/assets/ground.png');
-    game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/water.png');
+var ground;
 
-    //PHYSICS & POLYGONS
-    game.load.physics('physicsData', 'assets/poly_player.json');
+function preload(){
+
+    //IMAGES
+    game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
+    game.load.image('background', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
+    game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
+
+    //PHYSICS DATA
+    game.load.physics('mapData', 'assets/physicsData/map.json');
+    game.load.json('jsonData', 'assets/physicsData/map.json');
+    game.load.physics('charactersData', 'assets/physicsData/characters.json');
+
 }
 
 function create(){
 
     socket = io();
-    pointer = game.input.activePointer;
     game.physics.startSystem(Phaser.Physics.P2JS);
-    game.world.setBounds(0, 0, 2000, 2000);
-    // game.physics.p2.setImpactEvents(true);
+    game.world.setBounds(0, 0, 4000, 16000);
     game.physics.p2.gravity.y = 600;
     game.stage.disableVisibilityChange = true;
-
+    pointer = game.input.activePointer;
     collisionGroup = game.physics.p2.createCollisionGroup();
-
-    // GROUND
-    game.add.tileSprite(0, 0, 2000, 1000, 'background');
-    game.add.tileSprite(0, 1000, 2000, 2000, 'water');
-    ground = game.add.tileSprite(800, 900, 500, 50, 'ground');
-    game.physics.p2.enable([ ground ], true);
-    ground.body.data.gravityScale = 0;
-    ground.body.static = true;
-    ground.body.setCollisionGroup(collisionGroup);
-    ground.body.collides(collisionGroup);
+    createGround();
+    createWater();
 
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
+}
 
+function createGround(){
+  ground = game.add.tileSprite(2000, 8000, 4000, 16000, 'null');
+  ground.anchor.setTo(0.5);
+  game.physics.p2.enable([ ground ], true);
+  ground.body.clearShapes();
+  ground.body.loadPolygon('mapData', 'Ground');
+  ground.body.data.gravityScale = 0;
+  ground.body.static = true;
+  ground.body.setCollisionGroup(collisionGroup);
+  ground.body.collides(collisionGroup);
+}
+
+function createWater(){
+  // //WATER
+  waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
+  let waterData = game.cache.getJSON('jsonData').Water;
+  waterData.map( w => {
+    let waterTile = game.add.tileSprite(w[0]+(w[2]/2), w[1]+(w[3]/2), w[2], w[3], 'null');
+    waterTile.anchor.setTo(0.5);
+    game.physics.p2.enable([ waterTile ], true);
+    waterTile.body.data.gravityScale = 0;
+    waterTile.body.static = true;
+    waterGroup.add(waterTile);
+  });
 }
 
 function update(){
@@ -68,26 +83,19 @@ function update(){
 }
 
 function addPlayer(playerId){
-
-    player = game.add.sprite(game.world.centerX, game.world.centerY+500, 'player');
+    player = game.add.sprite(100, 15400, 'player');
     player.id = playerId;
     player.timestamp = Date.now();
     player.anchor.setTo(0.5);
-
     game.physics.p2.enable([ player ], true);
-
-
     player.body.clearShapes();
-    player.body.loadPolygon('physicsData', 'Player');
+    player.body.loadPolygon('charactersData', 'Player');
     player.body.setCollisionGroup(collisionGroup);
     player.body.collides(collisionGroup);
-
     game.camera.follow(player);
-
 }
 
 function addOtherPlayer(playerId){
-
     otherPlayer = game.add.sprite(400, 300, 'player');
     otherPlayer.id = playerId;
     otherPlayer.anchor.setTo(0.5);
@@ -98,17 +106,12 @@ function addOtherPlayer(playerId){
     otherPlayer.body.collides(collisionGroup);
     otherPlayer.body.data.gravityScale = 0;
     otherPlayers.add(otherPlayer);
-
      //megahack, not sure if it is reliable, need to check what happens when player is destroyed on disconnection
     otherPlayersRef[playerId] = otherPlayers.children.length -1;
 }
 
 function controlPlayer(){
-
-    // Todo: create method to determine this boolean checking player overlaps with water map-tile
-    let inWater = player.body.y > 1050;
-    inWater ? waterPhysics() : airPhysics();
-
+    isInWater() ? waterPhysics() : airPhysics();
     /*
         The state object below is a snapshot of the player sent with web socket which will be then broadcasted to all other players.
         This will probably change down the line, I don't think that all this data is necessary.
@@ -134,6 +137,16 @@ function controlPlayer(){
 
 }
 
+function isInWater(){
+    let inWater = false;
+    waterGroup.children.forEach(function(waterSprite){
+       if(player.overlap(waterSprite)){
+          inWater = true;
+       }
+    });
+    return inWater;
+}
+
 function waterPhysics(){
 
     /*  ========================================================================
@@ -149,7 +162,7 @@ function waterPhysics(){
     player.body.data.gravityScale = 0;
 
     if(pointerDistance > 50){
-        let maxSpeed = 700;
+        let maxSpeed = 750;
         let speed = pointerDistance*3;
         if(speed > maxSpeed){
             speed = maxSpeed;
@@ -160,11 +173,10 @@ function waterPhysics(){
     }
     else{
         player.body.speed = 0;
+        player.body.angularVelocity = 0;
         player.body.damping = 0.95;
     }
 }
-
-
 
 function airPhysics(){
     /*  ========================================================================
@@ -222,7 +234,7 @@ function handleSockets(){
     });
 
     socket.on('disconnect', function (playerId) {
-        otherPlayers.children[otherPlayersRef[playerData.id]].destroy();
+        otherPlayers.children[otherPlayersRef[playerId]].destroy();
         // .forEach(function (otherPlayer) {
         //     if (playerId === otherPlayer.id) {
         //         otherPlayer.destroy();
