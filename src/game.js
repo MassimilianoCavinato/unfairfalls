@@ -42,9 +42,8 @@ function create(){
     game.stage.disableVisibilityChange = true;
     pointer = game.input.activePointer;
     collisionGroup = game.physics.p2.createCollisionGroup();
-    createWater();
     createGround();
-
+    createWater();
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
 }
@@ -62,7 +61,6 @@ function createGround(){
 }
 
 function createWater(){
-  // //WATER
   waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
   let waterData = game.cache.getJSON('jsonData').Water;
   waterData.map( w => {
