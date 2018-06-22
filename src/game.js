@@ -42,8 +42,8 @@ function create(){
     game.stage.disableVisibilityChange = true;
     pointer = game.input.activePointer;
     collisionGroup = game.physics.p2.createCollisionGroup();
-    createGround();
     createWater();
+    createGround();
 
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
