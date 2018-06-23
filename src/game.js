@@ -18,12 +18,13 @@ var collisionGroup;
 var waterGroup;
 var otherPlayersRef = {};
 var ground;
+var maxSpeed = 750;
 
 function preload(){
 
     //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
-    game.load.image('background', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
+    game.load.image('background', 'http://localhost:5000/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
 
     //PHYSICS DATA
@@ -38,7 +39,7 @@ function create(){
     socket = io();
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.world.setBounds(0, 0, 4000, 16000);
-    game.physics.p2.gravity.y = 600;
+    game.physics.p2.gravity.y = 900;
     game.stage.disableVisibilityChange = true;
     pointer = game.input.activePointer;
     collisionGroup = game.physics.p2.createCollisionGroup();
@@ -49,7 +50,7 @@ function create(){
 }
 
 function createGround(){
-  ground = game.add.tileSprite(2000, 8000, 4000, 16000, 'null');
+  ground = game.add.tileSprite(2000, 8000, 4000, 16000, 'background');
   ground.anchor.setTo(0.5);
   game.physics.p2.enable([ ground ], true);
   ground.body.clearShapes();
@@ -64,7 +65,7 @@ function createWater(){
   waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
   let waterData = game.cache.getJSON('jsonData').Water;
   waterData.map( w => {
-    let waterTile = game.add.tileSprite(w[0]+(w[2]/2), w[1]+(w[3]/2), w[2], w[3], 'null');
+    let waterTile = game.add.tileSprite(w[0]+(w[2]/2), w[1]+(w[3]/2), w[2], w[3], 'background');
     waterTile.anchor.setTo(0.5);
     game.physics.p2.enable([ waterTile ], true);
     waterTile.body.data.gravityScale = 0;
@@ -158,22 +159,41 @@ function waterPhysics(){
     */
     let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
     player.body.data.gravityScale = 0;
+    player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
+    let angle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
+    player.body.rotation = angle;
+    if(pointerDistance > 200){
 
-    if(pointerDistance > 50){
-        let maxSpeed = 750;
-        let speed = pointerDistance*3;
-        if(speed > maxSpeed){
-            speed = maxSpeed;
-        }
-        player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
-        player.body.rotation = game.physics.arcade.angleToPointer(player);
-        game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, speed);
+
+      player.body.force.x = Math.cos(angle) * 5000;
+      player.body.force.y = Math.sin(angle) * 5000;
+      player.body.maxVelocity = 300;
+      if(player.body.velocity.y > maxSpeed){
+        player.body.velocity.y = maxSpeed;
+      }
+      if(player.body.velocity.y < -maxSpeed){
+        player.body.velocity.y = -maxSpeed;
+      }
+      if(player.body.velocity.x > maxSpeed){
+        player.body.velocity.x = maxSpeed;
+      }
+      if(player.body.velocity.x < -maxSpeed){
+        player.body.velocity.x = -maxSpeed;
+      }
+      console.log('x:',player.body.velocity.x, ' , ', 'y:', player.body.velocity.y);
+    }
+    else if(pointerDistance > 50){
+      // let angle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
+      // player.body.rotation = angle;
+      game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, 300);
     }
     else{
         player.body.speed = 0;
         player.body.angularVelocity = 0;
         player.body.damping = 0.95;
     }
+        // game.physics.arcade.accelerateToXY(player, pointer.worldX, pointer.worldY, 300);
+
 }
 
 function airPhysics(){
