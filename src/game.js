@@ -24,8 +24,9 @@ function preload(){
 
     //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
-    game.load.image('background', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
+    game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
+    game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
 
     //PHYSICS DATA
     game.load.physics('mapData', 'assets/physicsData/map.json');
@@ -43,14 +44,15 @@ function create(){
     game.stage.disableVisibilityChange = true;
     pointer = game.input.activePointer;
     collisionGroup = game.physics.p2.createCollisionGroup();
-    createGround();
+    game.add.tileSprite(0, 0, 4000, 16000, 'grid');
     createWater();
+    createGround();
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
 }
 
 function createGround(){
-  ground = game.add.tileSprite(2000, 8000, 4000, 16000, 'background');
+  ground = game.add.tileSprite(2000, 8000, 4000, 16000, 'transparent');
   ground.anchor.setTo(0.5);
   game.physics.p2.enable([ ground ], true);
   ground.body.clearShapes();
@@ -65,7 +67,7 @@ function createWater(){
   waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
   let waterData = game.cache.getJSON('jsonData').Water;
   waterData.map( w => {
-    let waterTile = game.add.tileSprite(w[0]+(w[2]/2), w[1]+(w[3]/2), w[2], w[3], 'background');
+    let waterTile = game.add.tileSprite(w[0]+(w[2]/2), w[1]+(w[3]/2), w[2], w[3], 'water');
     waterTile.anchor.setTo(0.5);
     game.physics.p2.enable([ waterTile ], true);
     waterTile.body.data.gravityScale = 0;
