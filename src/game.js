@@ -100,7 +100,7 @@ function addOtherPlayer(playerId){
     otherPlayer.anchor.setTo(0.5);
     game.physics.p2.enable([ otherPlayer ], true);
     otherPlayer.body.clearShapes();
-    otherPlayer.body.loadPolygon('physicsData', 'Player');
+    otherPlayer.body.loadPolygon('charactersData', 'Player');
     otherPlayer.body.setCollisionGroup(collisionGroup);
     otherPlayer.body.collides(collisionGroup);
     otherPlayer.body.data.gravityScale = 0;
@@ -180,7 +180,7 @@ function waterPhysics(){
       if(player.body.velocity.x < -maxSpeed){
         player.body.velocity.x = -maxSpeed;
       }
-      console.log('x:',player.body.velocity.x, ' , ', 'y:', player.body.velocity.y);
+      // console.log('x:',player.body.velocity.x, ' , ', 'y:', player.body.velocity.y);
     }
     else if(pointerDistance > 50){
       // let angle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
@@ -252,12 +252,12 @@ function handleSockets(){
     });
 
     socket.on('disconnect', function (playerId) {
-        otherPlayers.children[otherPlayersRef[playerId]].destroy();
-        // .forEach(function (otherPlayer) {
-        //     if (playerId === otherPlayer.id) {
-        //         otherPlayer.destroy();
-        //     }
-        // });
+        // otherPlayers.children[otherPlayersRef[playerId]].destroy();
+        otherPlayers.children.forEach(function (otherPlayer) {
+            if (playerId === otherPlayer.id) {
+                otherPlayer.destroy();
+            }
+        });
     });
 
 
