@@ -1,15 +1,28 @@
-var game = new Phaser.Game(
-    "100%",
-    "100%",
-    Phaser.CANVAS,
-    document.getElementById('unfairfalls'),
-    {
-        preload: preload,
-        create: create,
-        update: update,
-        render: render
-    }
-);
+var conf = {
+   width: 1024,
+   height: 768,
+   renderer: Phaser.CANVAS,
+   parent: 'unfairfalls',
+   state: this,
+   transparent: false,
+   antialias: true,
+   scaleMode: Phaser.ScaleManager.USER_SCALE,
+   forceSetTimeOut: true
+};
+//
+var game = new Phaser.Game(conf);
+// var game = new Phaser.Game(
+//     "100%",
+//     "100%",
+//     Phaser.CANVAS,
+//     document.getElementById('unfairfalls'),
+//     {
+//         preload: preload,
+//         create: create,
+//         update: update,
+//         render: render
+//     }
+// );
 
 var pointer;
 var player;
@@ -25,7 +38,7 @@ function preload(){
 
     //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
-    game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/dead.png');
+    game.load.image('dead', 'http://localhost:5000/assets/img/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
     game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
@@ -84,14 +97,13 @@ function createWater(){
 }
 
 function controlPlayerDeath(){
-
-  setInterval(function(respawnPlayer){
+  setInterval(function(){
     oxygen--;
     if(oxygen === 0){
       player.loadTexture('dead');
     }
     if(oxygen === -5){
-      let deadPlayer = game.add.sprite(player.body.x, player.body.y, 'dead');
+      let deadPlayer = game.add.sprite(3500, 15400, 'dead');
       deadPlayer.anchor.setTo(0.5);
       game.physics.p2.enable([ deadPlayer ], true);
       deadPlayer.body.clearShapes();
@@ -99,13 +111,13 @@ function controlPlayerDeath(){
       deadPlayer.body.setCollisionGroup(collisionGroup);
       deadPlayer.body.collides(collisionGroup);
       deadPlayer.body.rotation = player.body.rotation;
-
       player.body.x = 150;
       player.body.y = 15500;
       player.loadTexture('player');
       oxygen = 15;
     }
   }, 1000);
+
 }
 
 function update(){
