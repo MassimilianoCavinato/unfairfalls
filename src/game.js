@@ -1,28 +1,16 @@
 var conf = {
-   width: 1024,
-   height: 768,
+   width: '100%',
+   height: '100%',
    renderer: Phaser.CANVAS,
    parent: 'unfairfalls',
    state: this,
    transparent: false,
    antialias: true,
-   scaleMode: Phaser.ScaleManager.USER_SCALE,
-   forceSetTimeOut: true
+   scaleMode: Phaser.ScaleManager.RESIZE,
+   forceLandscape: true
 };
-//
+
 var game = new Phaser.Game(conf);
-// var game = new Phaser.Game(
-//     "100%",
-//     "100%",
-//     Phaser.CANVAS,
-//     document.getElementById('unfairfalls'),
-//     {
-//         preload: preload,
-//         create: create,
-//         update: update,
-//         render: render
-//     }
-// );
 
 var pointer;
 var player;
@@ -33,12 +21,13 @@ var otherPlayersRef = {};
 var ground;
 var maxSpeed = 750;
 var oxygen = 15;
+var inWater = false;
 
 function preload(){
 
     //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
-    game.load.image('dead', 'http://localhost:5000/assets/img/dead.png');
+    game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
     game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
@@ -65,10 +54,6 @@ function create(){
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
     controlPlayerDeath();
-
-
-
-
 }
 
 function createGround(){
@@ -133,13 +118,21 @@ function addPlayer(playerId){
     player = game.add.sprite(3500, 15400, 'player');
     player.id = playerId;
     player.timestamp = Date.now();
+    player.inputEnabled = true;
     player.anchor.setTo(0.5);
+    player.events.onInputDown.add(listener,this);
     game.physics.p2.enable([ player ], true);
     player.body.clearShapes();
     player.body.loadPolygon('charactersData', 'Player');
     player.body.setCollisionGroup(collisionGroup);
     player.body.collides(collisionGroup);
     game.camera.follow(player);
+}
+
+function listener(){
+  if(!inWater){
+    player.body.angularVelocity =  Math.random() < 0.5 ? -12 : 12;
+  }
 }
 
 function addOtherPlayer(playerId){
@@ -158,7 +151,9 @@ function addOtherPlayer(playerId){
 }
 
 function controlPlayer(){
-    isInWater() ? waterPhysics() : airPhysics();
+
+    isInWater()
+    inWater ? waterPhysics() : airPhysics();
     /*
         The state object below is a snapshot of the player sent with web socket which will be then broadcasted to all other players.
         This will probably change down the line, I don't think that all this data is necessary.
@@ -186,10 +181,9 @@ function controlPlayer(){
 
 function isInWater(){
 
-    let inWater = waterGroup.children.some(function(waterSprite){
+    inWater = waterGroup.children.some(function(waterSprite){
        return player.overlap(waterSprite) === true;
     });
-    return inWater;
 }
 
 function waterPhysics(){
