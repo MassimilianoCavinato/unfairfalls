@@ -19,11 +19,13 @@ var waterGroup;
 var otherPlayersRef = {};
 var ground;
 var maxSpeed = 750;
+var oxygen = 15;
 
 function preload(){
 
     //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
+    game.load.image('dead', 'http://localhost:5000/assets/img/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
     game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
@@ -49,6 +51,11 @@ function create(){
     createGround();
     otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
+    controlPlayerDeath();
+
+
+
+
 }
 
 function createGround(){
@@ -76,15 +83,42 @@ function createWater(){
   });
 }
 
+function controlPlayerDeath(){
+
+  setInterval(function(respawnPlayer){
+    oxygen--;
+    if(oxygen === 0){
+      player.loadTexture('dead');
+    }
+    if(oxygen === -5){
+      let deadPlayer = game.add.sprite(player.body.x, player.body.y, 'dead');
+      deadPlayer.anchor.setTo(0.5);
+      game.physics.p2.enable([ deadPlayer ], true);
+      deadPlayer.body.clearShapes();
+      deadPlayer.body.loadPolygon('charactersData', 'Player');
+      deadPlayer.body.setCollisionGroup(collisionGroup);
+      deadPlayer.body.collides(collisionGroup);
+      deadPlayer.body.rotation = player.body.rotation;
+
+      player.body.x = 150;
+      player.body.y = 15500;
+      player.loadTexture('player');
+      oxygen = 15;
+    }
+  }, 1000);
+}
+
 function update(){
     //should find a way to remove this check at each update
     if(typeof(player) !== 'undefined'){
-        controlPlayer();
+      if(player.alive){
+          controlPlayer();
+      }
     }
 }
 
 function addPlayer(playerId){
-    player = game.add.sprite(100, 15400, 'player');
+    player = game.add.sprite(3500, 15400, 'player');
     player.id = playerId;
     player.timestamp = Date.now();
     player.anchor.setTo(0.5);
@@ -139,11 +173,9 @@ function controlPlayer(){
 }
 
 function isInWater(){
-    let inWater = false;
-    waterGroup.children.forEach(function(waterSprite){
-       if(player.overlap(waterSprite)){
-          inWater = true;
-       }
+
+    let inWater = waterGroup.children.some(function(waterSprite){
+       return player.overlap(waterSprite) === true;
     });
     return inWater;
 }
@@ -159,17 +191,17 @@ function waterPhysics(){
         The bigger is the distance from the pointer and the faseter he moves, up to 800 max speed
         When the pointer is close to the player, the sprite should stop smoothly and stop angling to avoid shaky animation
     */
+    oxygen = 15;
     let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
     player.body.data.gravityScale = 0;
     player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
-    let angle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
-    player.body.rotation = angle;
-    if(pointerDistance > 200){
 
+    if(pointerDistance > 100){
 
-      player.body.force.x = Math.cos(angle) * 5000;
-      player.body.force.y = Math.sin(angle) * 5000;
-      player.body.maxVelocity = 300;
+      let forceAngle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
+      player.body.force.x = Math.cos(forceAngle) * 5000;
+      player.body.force.y = Math.sin(forceAngle) * 5000;
+
       if(player.body.velocity.y > maxSpeed){
         player.body.velocity.y = maxSpeed;
       }
@@ -182,12 +214,14 @@ function waterPhysics(){
       if(player.body.velocity.x < -maxSpeed){
         player.body.velocity.x = -maxSpeed;
       }
+
+      player.body.rotation = Math.atan2(player.body.velocity.y, player.body.velocity.x)
       // console.log('x:',player.body.velocity.x, ' , ', 'y:', player.body.velocity.y);
     }
     else if(pointerDistance > 50){
-      // let angle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
-      // player.body.rotation = angle;
-      game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, 300);
+      player.body.rotation = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
+      game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, 250);
+      player.body.damping = 0.99;
     }
     else{
         player.body.speed = 0;
@@ -205,6 +239,7 @@ function airPhysics(){
         Player is affected by game gravity
         He can still angle in direction of the pointer but shouldn't have any control whatsoever the direction and speed.
     */
+
     let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
     player.body.data.gravityScale = 1;
     player.body.damping = 0;
@@ -226,13 +261,14 @@ function controlOtherPlayer(otherPlayer, playerData){
 }
 
 function render() {
+    let text;
+    if(oxygen <= 0){
+      text = "You are dead :( , respawn in " + (5+oxygen).toString() + " seconds";
+    }else{
+      text = "Oxygen : "+oxygen.toString();
+    }
+    game.debug.text(text, 32, 32);
 
-    // game.debug.cameraInfo(game.camera, 32, 32);
-    // game.debug.pointer(pointer);
-    // game.debug.pointer(game.input.activePointer);
-    // if(typeof player !== 'undefined'){
-    //     game.debug.spriteInfo(player, 500, 32);
-    // }
 }
 
 function handleSockets(){
