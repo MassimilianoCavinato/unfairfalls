@@ -25,7 +25,7 @@ function preload(){
 
     //IMAGES
     game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
-    game.load.image('dead', 'http://localhost:5000/assets/img/dead.png');
+    game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
     game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
