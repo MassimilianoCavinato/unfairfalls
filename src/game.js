@@ -1,5 +1,5 @@
 var conf = {
-   width: 1200,
+   width: 1600,
    height: 900,
    renderer: Phaser.CANVAS,
    parent: 'unfairfalls',
