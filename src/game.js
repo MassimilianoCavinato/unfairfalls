@@ -138,7 +138,7 @@ function addPlayer(playerId){
     player.inputEnabled = true;
     player.anchor.setTo(0.5);
     player.events.onInputDown.add(flap,this);
-    game.physics.p2.enable([ player ], true);
+    game.physics.p2.enable([ player ], false);
     player.body.clearShapes();
     player.body.loadPolygon('charactersData', 'Player');
     player.body.setCollisionGroup(collisionGroup);
