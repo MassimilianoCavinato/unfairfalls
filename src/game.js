@@ -1,6 +1,6 @@
 var conf = {
-   width: '100%',
-   height: '100%',
+   width: 800,
+   height: 600,
    renderer: Phaser.CANVAS,
    parent: 'unfairfalls',
    state: this,
@@ -22,12 +22,15 @@ var ground;
 var maxSpeed = 750;
 var oxygen = 15;
 var inWater = false;
+var skins = ['skin0','skin1','skin2','skin3'];
 
 function preload(){
 
-    //IMAGES
-    game.load.image('player', 'https://unfairfalls.herokuapp.com/assets/img/salmon.png');
-    game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/dead.png');
+    game.load.image('skin0', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png');
+    game.load.image('skin1', 'https://unfairfalls.herokuapp.com/img/skins/skin1.png');
+    game.load.image('skin2', 'https://unfairfalls.herokuapp.com/img/skins/skin2.png');
+    game.load.image('skin3', 'https://unfairfalls.herokuapp.com/img/skins/skin3.png');
+    game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/skins/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
     game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
@@ -51,9 +54,29 @@ function create(){
     game.add.tileSprite(0, 0, 4000, 16000, 'grid');
     createWater();
     createGround();
-    otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     handleSockets();
     controlPlayerDeath();
+    otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
+}
+
+function update(){
+    //should find a way to remove this check at each update
+    if(typeof(player) !== 'undefined'){
+      if(player.alive){
+          controlPlayer();
+      }
+    }
+}
+
+function render() {
+    let text;
+    if(oxygen <= 0){
+      text = "You are dead :( , respawn in " + (5+oxygen).toString() + " seconds";
+    }else{
+      text = "Oxygen : "+oxygen.toString();
+    }
+    game.debug.text(text, 32, 32);
+
 }
 
 function createGround(){
@@ -98,44 +121,44 @@ function controlPlayerDeath(){
       deadPlayer.body.rotation = player.body.rotation;
       player.body.x = 150;
       player.body.y = 15500;
-      player.loadTexture('player');
+
+      player.loadTexture(getRandomSkin());
       oxygen = 15;
     }
   }, 1000);
 
 }
 
-function update(){
-    //should find a way to remove this check at each update
-    if(typeof(player) !== 'undefined'){
-      if(player.alive){
-          controlPlayer();
-      }
-    }
-}
-
 function addPlayer(playerId){
-    player = game.add.sprite(3500, 15400, 'player');
+    //RANDOM SKIN
+    let skin = getRandomSkin();
+    player = game.add.sprite(3500, 15400, skin);
     player.id = playerId;
     player.timestamp = Date.now();
     player.inputEnabled = true;
     player.anchor.setTo(0.5);
-    player.events.onInputDown.add(listener,this);
+    player.events.onInputDown.add(flap,this);
     game.physics.p2.enable([ player ], true);
     player.body.clearShapes();
     player.body.loadPolygon('charactersData', 'Player');
     player.body.setCollisionGroup(collisionGroup);
     player.body.collides(collisionGroup);
     game.camera.follow(player);
+    game.physics.p2.createSpring(player, pointer, 20, 10, 1);
 }
 
-function listener(){
+function getRandomSkin(){
+    return skins[Math.floor(Math.random()*skins.length)]
+}
+
+function flap(){
   if(!inWater){
-    player.body.angularVelocity =  Math.random() < 0.5 ? -12 : 12;
+    player.body.angularVelocity = pointer.worldX > player.x ? 15 : -15;
   }
 }
 
 function addOtherPlayer(playerId){
+
     otherPlayer = game.add.sprite(400, 300, 'player');
     otherPlayer.id = playerId;
     otherPlayer.anchor.setTo(0.5);
@@ -152,7 +175,7 @@ function addOtherPlayer(playerId){
 
 function controlPlayer(){
 
-    isInWater()
+    isInWater();
     inWater ? waterPhysics() : airPhysics();
     /*
         The state object below is a snapshot of the player sent with web socket which will be then broadcasted to all other players.
@@ -180,7 +203,6 @@ function controlPlayer(){
 }
 
 function isInWater(){
-
     inWater = waterGroup.children.some(function(waterSprite){
        return player.overlap(waterSprite) === true;
     });
@@ -197,7 +219,8 @@ function waterPhysics(){
         The bigger is the distance from the pointer and the faseter he moves, up to 800 max speed
         When the pointer is close to the player, the sprite should stop smoothly and stop angling to avoid shaky animation
     */
-    oxygen = 15;
+
+    oxygen = 100;
     let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
     player.body.data.gravityScale = 0;
     player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
@@ -222,7 +245,6 @@ function waterPhysics(){
       }
 
       player.body.rotation = Math.atan2(player.body.velocity.y, player.body.velocity.x)
-      // console.log('x:',player.body.velocity.x, ' , ', 'y:', player.body.velocity.y);
     }
     else if(pointerDistance > 50){
       player.body.rotation = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
@@ -234,8 +256,6 @@ function waterPhysics(){
         player.body.angularVelocity = 0;
         player.body.damping = 0.95;
     }
-        // game.physics.arcade.accelerateToXY(player, pointer.worldX, pointer.worldY, 300);
-
 }
 
 function airPhysics(){
@@ -250,7 +270,6 @@ function airPhysics(){
     player.body.data.gravityScale = 1;
     player.body.damping = 0;
     player.body.speed = 0;
-    // player.body.rotation = game.physics.arcade.angleToPointer(player);
     player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
 }
 
@@ -266,16 +285,7 @@ function controlOtherPlayer(otherPlayer, playerData){
     otherPlayer.scale.y = playerData.scale.y;
 }
 
-function render() {
-    let text;
-    if(oxygen <= 0){
-      text = "You are dead :( , respawn in " + (5+oxygen).toString() + " seconds";
-    }else{
-      text = "Oxygen : "+oxygen.toString();
-    }
-    game.debug.text(text, 32, 32);
 
-}
 
 function handleSockets(){
 
@@ -303,6 +313,4 @@ function handleSockets(){
             }
         });
     });
-
-
 }
