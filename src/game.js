@@ -1,6 +1,6 @@
 var conf = {
-   width: 800,
-   height: 600,
+   width: 1200,
+   height: 900,
    renderer: Phaser.CANVAS,
    parent: 'unfairfalls',
    state: this,
@@ -158,8 +158,8 @@ function flap(){
 }
 
 function addOtherPlayer(playerId){
-
-    otherPlayer = game.add.sprite(400, 300, 'player');
+    let skin = getRandomSkin();
+    otherPlayer = game.add.sprite(400, 300, skin);
     otherPlayer.id = playerId;
     otherPlayer.anchor.setTo(0.5);
     game.physics.p2.enable([ otherPlayer ], true);
