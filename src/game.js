@@ -27,9 +27,9 @@ var skins = ['skin0','skin1','skin2','skin3'];
 function preload(){
 
     game.load.image('skin0', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png');
-    game.load.image('skin1', 'https://unfairfalls.herokuapp.com/img/skins/skin1.png');
-    game.load.image('skin2', 'https://unfairfalls.herokuapp.com/img/skins/skin2.png');
-    game.load.image('skin3', 'https://unfairfalls.herokuapp.com/img/skins/skin3.png');
+    game.load.image('skin1', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin1.png');
+    game.load.image('skin2', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin2.png');
+    game.load.image('skin3', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin3.png');
     game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/skins/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
     game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
