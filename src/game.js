@@ -32,7 +32,7 @@ function preload(){
     game.load.image('skin3', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin3.png');
     game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/skins/dead.png');
     game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
-    game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
+    game.load.image('water', 'http://localhost:5000/assets/img/water.png');
     game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
 
     //PHYSICS DATA
@@ -75,7 +75,7 @@ function render() {
     }else{
       text = "Oxygen : "+oxygen.toString();
     }
-    game.debug.text(text, 32, 32);
+    game.debug.text(text, 32, 30);
 
 }
 
@@ -97,7 +97,7 @@ function createWater(){
   waterData.map( w => {
     let waterTile = game.add.tileSprite(w[0]+(w[2]/2), w[1]+(w[3]/2), w[2], w[3], 'water');
     waterTile.anchor.setTo(0.5);
-    game.physics.p2.enable([ waterTile ], true);
+    game.physics.p2.enable([ waterTile ], false);
     waterTile.body.data.gravityScale = 0;
     waterTile.body.static = true;
     waterGroup.add(waterTile);
@@ -132,7 +132,7 @@ function controlPlayerDeath(){
 function addPlayer(playerId){
     //RANDOM SKIN
     let skin = getRandomSkin();
-    player = game.add.sprite(3500, 15400, skin);
+    player = game.add.sprite(2200, 14000, skin);
     player.id = playerId;
     player.timestamp = Date.now();
     player.inputEnabled = true;
@@ -154,6 +154,7 @@ function getRandomSkin(){
 function flap(){
   if(!inWater){
     player.body.angularVelocity = pointer.worldX > player.x ? 15 : -15;
+    player.body.velocity.y -= 50;
   }
 }
 
@@ -182,6 +183,7 @@ function controlPlayer(){
         This will probably change down the line, I don't think that all this data is necessary.
         Also, this data should be encoded client side and decoded server side to make TCP traffic faster.
     */
+
     let state = {
         id: player.id,
         body: {
@@ -228,8 +230,9 @@ function waterPhysics(){
     if(pointerDistance > 100){
 
       let forceAngle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
-      player.body.force.x = Math.cos(forceAngle) * 5000;
-      player.body.force.y = Math.sin(forceAngle) * 5000;
+      player.body.force.x = Math.cos(forceAngle) * 7500;
+      player.body.force.y = Math.sin(forceAngle) * 7500;
+
 
       if(player.body.velocity.y > maxSpeed){
         player.body.velocity.y = maxSpeed;
