@@ -233,10 +233,9 @@ function play(){
       oxygen = 100;
       let pointerDistance = Math.sqrt(Math.pow(pointer.worldX - player.body.x, 2) + Math.pow(pointer.worldY - player.body.y, 2));
       player.body.data.gravityScale = 0;
-      player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
 
       if(pointerDistance > 100){
-
+        player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
         let forceAngle = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
         player.body.force.x = Math.cos(forceAngle) * 7500;
         player.body.force.y = Math.sin(forceAngle) * 7500;
@@ -258,6 +257,7 @@ function play(){
         player.body.rotation = Math.atan2(player.body.velocity.y, player.body.velocity.x)
       }
       else if(pointerDistance > 50){
+        player.scale.y = pointer.worldX < player.x ? - Math.abs(player.scale.y) :  Math.abs(player.scale.y);
         player.body.rotation = Math.atan2(pointer.worldY - player.body.y, pointer.worldX - player.body.x);
         game.physics.arcade.moveToXY(player, pointer.worldX, pointer.worldY, 250);
         player.body.damping = 0.99;
