@@ -1,20 +1,20 @@
 import { game } from './game.module.js';
-import { globals } from './../globals.js';
+import { Physics } from './physics.module.js';
 
 export var Stage = {
   createGround: function() {
-    globals.ground = game.add.tileSprite(2000, 8000, 4000, 16000, 'transparent');
-    globals.ground.anchor.setTo(0.5);
-    game.physics.p2.enable([globals.ground], true);
-    globals.ground.body.clearShapes();
-    globals.ground.body.loadPolygon('mapData', 'Ground');
-    globals.ground.body.data.gravityScale = 0;
-    globals.ground.body.static = true;
-    globals.ground.body.setCollisionGroup(globals.collisionGroup);
-    globals.ground.body.collides(globals.collisionGroup);
+    Physics.groundGroup = game.add.tileSprite(2000, 8000, 4000, 16000, 'transparent');
+    Physics.groundGroup.anchor.setTo(0.5);
+    game.physics.p2.enable([Physics.groundGroup], true);
+    Physics.groundGroup.body.clearShapes();
+    Physics.groundGroup.body.loadPolygon('mapData', 'Ground');
+    Physics.groundGroup.body.data.gravityScale = 0;
+    Physics.groundGroup.body.static = true;
+    Physics.groundGroup.body.setCollisionGroup(Physics.collisionGroup);
+    Physics.groundGroup.body.collides(Physics.collisionGroup);
   },
   createWater: function() {
-    globals.waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
+    Physics.waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
     let waterData = game.cache.getJSON('jsonData').Water;
     waterData.map(w => {
       let waterTile = game.add.tileSprite(w[0] + (w[2] / 2), w[1] + (w[3] / 2), w[2], w[3], 'water');
@@ -22,7 +22,7 @@ export var Stage = {
       game.physics.p2.enable([waterTile], false);
       waterTile.body.data.gravityScale = 0;
       waterTile.body.static = true;
-      globals.waterGroup.add(waterTile);
+      Physics.waterGroup.add(waterTile);
     });
   }
 }

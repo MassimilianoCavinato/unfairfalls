@@ -1,7 +1,7 @@
-import { globals } from './../globals.js';
 import { Stage } from './stage.module.js';
 import { Player } from './player.module.js';
-import { handleSockets } from './multiplayer.module.js';
+import { Multiplayer } from './multiplayer.module.js';
+import { Physics } from './physics.module.js';
 
 var conf = {
   width: 1600,
@@ -27,32 +27,32 @@ var conf = {
 
     },
     create: function() {
-      globals.socket = io();
+      Multiplayer.initConnection();
       game.physics.startSystem(Phaser.Physics.P2JS);
       game.world.setBounds(0, 0, 4000, 16000);
       game.physics.p2.gravity.y = 900;
       game.stage.disableVisibilityChange = true;
-      globals.pointer = game.input.activePointer;
-      globals.collisionGroup = game.physics.p2.createCollisionGroup();
+      Player.pointer = game.input.activePointer;
+      Physics.collisionGroup = game.physics.p2.createCollisionGroup();
       game.add.tileSprite(0, 0, 4000, 16000, 'grid');
       Stage.createWater();
       Stage.createGround();
-      handleSockets();
+      Multiplayer.handleSockets();
       Player.controlPlayerDeath();
-      globals.otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
+      Player.otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
     },
 
     update: function() {
       //should find a way to remove this check at each update
-      return typeof (globals.player) !== 'undefined' ? Player.controlPlayer() : null;
+      return typeof (Player.player) !== 'undefined' ? Player.controlPlayer() : null;
     },
 
     render: function() {
       let text;
-      if (globals.oxygen <= 0) {
-        text = "You are dead :( , respawn in " + (5 + globals.oxygen).toString() + " seconds";
+      if (Player.oxygen <= 0) {
+        text = "You are dead :( , respawn in " + (5 + Player.oxygen).toString() + " seconds";
       } else {
-        text = "Oxygen : " + globals.oxygen.toString();
+        text = "Oxygen : " + Player.oxygen.toString();
       }
       game.debug.text(text, 32, 30);
 

@@ -1,27 +1,35 @@
-import { globals } from './../globals.js';
 import { game } from './game.module.js';
 import { Physics } from './physics.module.js';
+import { Multiplayer } from './multiplayer.module.js';
 
 export var Player = {
+  maxSpeed: 750,
+  oxygen: 30,
+  inWater: false,
+  skins: ['skin0', 'skin1', 'skin2', 'skin3'],
+  player: {},
+  otherPlayers: {},
+  otherPlayersRef: {},
+  pointer: {},
   controlPlayerDeath: function() {
     setInterval(() => {
-      globals.oxygen--;
-      if (globals.oxygen === 0) {
-        globals.player.loadTexture('dead');
+      Player.oxygen--;
+      if (Player.oxygen === 0) {
+        Player.player.loadTexture('dead');
       }
-      if (globals.oxygen === -5) {
+      if (Player.oxygen === -5) {
         let deadPlayer = game.add.sprite(3500, 15400, 'dead');
         deadPlayer.anchor.setTo(0.5);
         game.physics.p2.enable([deadPlayer], true);
         deadPlayer.body.clearShapes();
         deadPlayer.body.loadPolygon('charactersData', 'Player');
-        deadPlayer.body.setCollisionGroup(globals.collisionGroup);
-        deadPlayer.body.collides(globals.collisionGroup);
-        deadPlayer.body.rotation = globals.player.body.rotation;
-        globals.player.body.x = 150;
-        globals.player.body.y = 15500;
-        globals.player.loadTexture(this.getRandomSkin());
-        globals.oxygen = 15;
+        deadPlayer.body.setCollisionGroup(Physics.collisionGroup);
+        deadPlayer.body.collides(Physics.collisionGroup);
+        deadPlayer.body.rotation = Player.player.body.rotation;
+        Player.player.body.x = 150;
+        Player.player.body.y = 15500;
+        Player.player.loadTexture(this.getRandomSkin());
+        Player.oxygen = 15;
       }
     }, 1000);
 
@@ -29,27 +37,27 @@ export var Player = {
   addPlayer: function(playerId) {
     //RANDOM SKIN
     let skin = this.getRandomSkin();
-    globals.player = game.add.sprite(2200, 14000, skin);
-    globals.player.id = playerId;
-    globals.player.timestamp = Date.now();
-    globals.player.inputEnabled = true;
-    globals.player.anchor.setTo(0.5);
-    globals.player.events.onInputDown.add(this.flap, this);
-    game.physics.p2.enable([globals.player], false);
-    globals.player.body.clearShapes();
-    globals.player.body.loadPolygon('charactersData', 'Player');
-    globals.player.body.setCollisionGroup(globals.collisionGroup);
-    globals.player.body.collides(globals.collisionGroup);
-    game.camera.follow(globals.player);
-    game.physics.p2.createSpring(globals.player, globals.pointer, 20, 10, 1);
+    Player.player = game.add.sprite(2200, 14000, skin);
+    Player.player.id = playerId;
+    Player.player.timestamp = Date.now();
+    Player.player.inputEnabled = true;
+    Player.player.anchor.setTo(0.5);
+    Player.player.events.onInputDown.add(this.flap, this);
+    game.physics.p2.enable([Player.player], false);
+    Player.player.body.clearShapes();
+    Player.player.body.loadPolygon('charactersData', 'Player');
+    Player.player.body.setCollisionGroup(Physics.collisionGroup);
+    Player.player.body.collides(Physics.collisionGroup);
+    game.camera.follow(Player.player);
+    game.physics.p2.createSpring(Player.player, Player.pointer, 20, 10, 1);
   },
   getRandomSkin: function() {
-    return globals.skins[Math.floor(Math.random() * globals.skins.length)]
+    return Player.skins[Math.floor(Math.random() * Player.skins.length)]
   },
   flap: function() {
-    if (!globals.inWater) {
-      globals.player.body.angularVelocity = globals.pointer.worldX > globals.player.x ? 15 : -15;
-      globals.player.body.velocity.y -= 50;
+    if (!Player.inWater) {
+      Player.player.body.angularVelocity = Player.pointer.worldX > Player.player.x ? 15 : -15;
+      Player.player.body.velocity.y -= 50;
     }
   },
   addOtherPlayer: function(playerId) {
@@ -60,18 +68,18 @@ export var Player = {
     game.physics.p2.enable([otherPlayer], true);
     otherPlayer.body.clearShapes();
     otherPlayer.body.loadPolygon('charactersData', 'Player');
-    otherPlayer.body.setCollisionGroup(globals.collisionGroup);
-    otherPlayer.body.collides(globals.collisionGroup);
+    otherPlayer.body.setCollisionGroup(Physics.collisionGroup);
+    otherPlayer.body.collides(Physics.collisionGroup);
     otherPlayer.body.data.gravityScale = 0;
-    globals.otherPlayers.add(otherPlayer);
+    Player.otherPlayers.add(otherPlayer);
     //megahack, not sure if it is reliable, need to check what happens when player is destroyed on disconnection
-    globals.otherPlayersRef[playerId] = globals.otherPlayers.children.length - 1;
+    Player.otherPlayersRef[playerId] = Player.otherPlayers.children.length - 1;
   },
   restoreOxygen: function() {
-    globals.oxygen = 30;
+    Player.oxygen = 30;
   },
   controlPlayer: function() {
-    if (Object.keys(globals.player).length > 1) {
+    if (Object.keys(Player.player).length > 1) {
       Physics.isInWater() ? Physics.waterPhysics() : Physics.airPhysics();
       /*
           The state object below is a snapshot of the player sent with web socket which will be then broadcasted to all other players.
@@ -80,22 +88,22 @@ export var Player = {
       */
 
       let state = {
-        id: globals.player.id,
+        id: Player.player.id,
         body: {
-          x: globals.player.body.x,
-          y: globals.player.body.y,
-          rotation: globals.player.body.rotation,
+          x: Player.player.body.x,
+          y: Player.player.body.y,
+          rotation: Player.player.body.rotation,
           velocity: {
-            x: globals.player.body.velocity.x,
-            y: globals.player.body.velocity.y
+            x: Player.player.body.velocity.x,
+            y: Player.player.body.velocity.y
           }
         },
         scale: {
-          y: globals.player.scale.y
+          y: Player.player.scale.y
         },
         timestamp: Date.now()
       };
-      globals.socket.emit('playerAction', state);
+      Multiplayer.socket.emit('playerAction', state);
     }
   },
   controlOtherPlayer: function(otherPlayer, playerData) {
