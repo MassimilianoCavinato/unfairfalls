@@ -1,11 +1,9 @@
 var http = require('http');
 var express = require('express');
 var socket = require('socket.io');
-
 var app = express();
 var server = http.Server(app);
 var io = socket.listen(server);
-var players = {};
 
 
 var port = process.env.PORT || 5000;
