@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8" name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
     <title>Unfair Falls</title>
+    <script src='/src/lib/phaser.min.js'></script>
+    <script src='./socket.io/socket.io.js'></script>
 <style>
       body{
         margin: 0px;
@@ -19,9 +21,17 @@
     </style>
 </head>
 <body>
-    <div id='unfairfalls'></div>
-    <script src='/src/lib/phaser.min.js'></script>
-    <script src='./socket.io/socket.io.js'></script>
-    <script src='/src/main.js' type="module"></script>
+    <div id='unfairfalls'>
+      <input id="username" maxlength='12' placeholder='silly salmon'><button onclick='importMain();'>Play!</button>
+    </div>
+    <script type='text/javascript'>
+      function importMain(){
+        let script = document.createElement("script");
+        script.type = "module";
+        script.src = "/src/main.js";
+        document.getElementsByTagName("body")[0].appendChild(script);
+        return false;
+      }
+    </script>
 </body>
 </html>

@@ -12,14 +12,13 @@ app.use('/css', express.static(__dirname + '/css'));
 app.use('/src', express.static(__dirname + '/src'));
 app.use('/assets', express.static(__dirname + '/assets'));
 
+var players = {};
 
 io.on('connection', function(socket) {
   //CONNECTION
-  players[socket.id] = {
-    id: socket.id
-  };
+  players[socket.id] = {id: socket.id, username: socket.handshake.query.username};
   socket.emit('currentPlayers', players);
-  socket.broadcast.emit('newPlayer', players[socket.id].id);
+  socket.broadcast.emit('newPlayer', players[socket.id]);
   console.log('User', socket.id, 'just connected!');
 
   //DISCONNECTION

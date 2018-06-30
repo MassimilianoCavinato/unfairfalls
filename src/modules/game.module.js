@@ -1,68 +1,69 @@
 import { Stage } from './stage.module.js';
-import { Player } from './player.module.js';
+import { Players } from './players.module.js';
 import { Multiplayer } from './multiplayer.module.js';
 import { Physics } from './physics.module.js';
+var username = document.getElementById('username').value.substring(0,12);
+document.getElementById('unfairfalls').innerHTML = '';
 
 var conf = {
   width: 1600,
   height: 900,
   renderer: Phaser.CANVAS,
   parent: 'unfairfalls',
+  transparent: false,
+  antialias: true,
   state: {
     preload: function() {
 
-      game.load.image('skin0', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png');
-      game.load.image('skin1', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin1.png');
-      game.load.image('skin2', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin2.png');
-      game.load.image('skin3', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin3.png');
-      game.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/skins/dead.png');
-      game.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
-      game.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
-      game.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
+      //IMAGE DATA
+      this.load.image('skin0', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png');
+      this.load.image('skin1', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin1.png');
+      this.load.image('skin2', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin2.png');
+      this.load.image('skin3', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin3.png');
+      this.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/skins/dead.png');
+      this.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
+      this.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
+      this.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
 
       //PHYSICS DATA
-      game.load.physics('mapData', 'assets/physicsData/map.json');
-      game.load.json('jsonData', 'assets/physicsData/map.json');
-      game.load.physics('charactersData', 'assets/physicsData/characters.json');
+      this.load.physics('mapData', 'assets/physicsData/map.json');
+      this.load.json('jsonData', 'assets/physicsData/map.json');
+      this.load.physics('charactersData', 'assets/physicsData/characters.json');
 
     },
     create: function() {
-      Multiplayer.initConnection();
-      game.physics.startSystem(Phaser.Physics.P2JS);
-      game.world.setBounds(0, 0, 4000, 16000);
-      game.physics.p2.gravity.y = 900;
-      game.stage.disableVisibilityChange = true;
-      Player.pointer = game.input.activePointer;
-      Physics.collisionGroup = game.physics.p2.createCollisionGroup();
-      game.add.tileSprite(0, 0, 4000, 16000, 'grid');
+
+      this.physics.startSystem(Phaser.Physics.P2JS);
+      this.world.setBounds(0, 0, 4000, 16000);
+      this.physics.p2.gravity.y = 900;
+      this.stage.disableVisibilityChange = true;
+      Physics.collisionGroup = this.physics.p2.createCollisionGroup();
+      this.add.tileSprite(0, 0, 4000, 16000, 'grid');
       Stage.createWater();
       Stage.createGround();
+      Multiplayer.initConnection(username);
       Multiplayer.handleSockets();
-      Player.controlPlayerDeath();
-      Player.otherPlayers = game.add.physicsGroup(Phaser.Physics.P2JS);
+      Players.controlPlayerDeath();
+      Players.otherPlayers = this.add.physicsGroup(Phaser.Physics.P2JS);
     },
 
     update: function() {
       //should find a way to remove this check at each update
-      return typeof (Player.player) !== 'undefined' ? Player.controlPlayer() : null;
+      return typeof (Players.mainPlayer) !== 'undefined' ? Players.controlMain() : null;
     },
 
     render: function() {
-      let text;
-      if (Player.oxygen <= 0) {
-        text = "You are dead :( , respawn in " + (5 + Player.oxygen).toString() + " seconds";
-      } else {
-        text = "Oxygen : " + Player.oxygen.toString();
+      let debug_text;
+      if(typeof Players.mainPlayer.oxygen !== 'undefined'){
+        if (Players.mainPlayer.oxygen <= 0) {
+          debug_text = "You are dead :( , respawn in " + (5 + Players.mainPlayer.oxygen).toString() + " seconds";
+        } else {
+          debug_text = "Oxygen : " + Players.mainPlayer.oxygen.toString();
+        }
+        game.debug.text(debug_text, 32, 30);
       }
-      game.debug.text(text, 32, 30);
-
-    }
+    },
   },
-  transparent: false,
-  antialias: true,
-  scaleMode: Phaser.ScaleManager.RESIZE,
-  forceLandscape: true
 };
 
-//init phaser game
 export var game = new Phaser.Game(conf);

@@ -1,34 +1,39 @@
-import { Player } from './player.module.js';
+import { Players } from './players.module.js';
 
 export var Multiplayer = {
-  handleSockets: function() {
-    this.socket.on('currentPlayers', (players) => {
-      Object.keys(players).forEach((playerId, index) => {
-        playerId === this.socket.id ? Player.addPlayer(playerId) : Player.addOtherPlayer(playerId);
-      });
-    });
 
-    this.socket.on('playerActionFinished', function(playerData) {
+  socket: null,
+
+  initConnection: function(username) {
+    this.socket = io({query: {username: username}});
+    console.log(this.socket);
+  },
+
+  handleSockets: function() {
+      this.socket.on('currentPlayers', (players) => {
+        Object.values(players).forEach((playerData) => {
+          let isMain = playerData.id == this.socket.id;
+          Players.addPlayer(playerData, isMain);
+        });
+      });
+
+    this.socket.on('playerActionFinished', (playerData) => {
       if (playerData.id !== this.socket.id) {
-        Player.controlOtherPlayer(Player.otherPlayers.children[Player.otherPlayersRef[playerData.id]], playerData);
+        Players.controlOther(playerData);
       }
     });
 
-    this.socket.on('newPlayer', function(playerId) {
-      Player.addOtherPlayer(playerId);
+    this.socket.on('newPlayer', (playerData) => {
+      Players.addPlayer(playerData, false);
     });
 
-    this.socket.on('disconnect', function(playerId) {
+    this.socket.on('disconnect', (playerId) => {
       // otherPlayers.children[otherPlayersRef[playerId]].destroy();
-      Player.otherPlayers.children.forEach(function(otherPlayer) {
+      Players.otherPlayers.children.forEach(function(otherPlayer) {
         if (playerId === otherPlayer.id) {
           otherPlayer.destroy();
         }
       });
     });
-  },
-  initConnection: function() {
-    this.socket = io()
-  },
-  socket: null
+  }
 }
