@@ -22,11 +22,12 @@ export var Players = {
     player.body.loadPolygon('charactersData', 'Player');
     player.body.setCollisionGroup(Physics.collisionGroup);
     player.body.collides(Physics.collisionGroup);
+    player.body.restitution = 0;
     isMain ? this.setMain(player) : this.setOther(player);
   },
 
   setMain: function(player){
-    player.stats = { maxSpeed: 700, maxOxygen: 15, maxForce: 6500};
+    player.stats = { maxSpeed: 725, maxOxygen: 15, maxForce: 6750};
     player.oxygen = 15;
     player.inWater = false;
     player.timestamp = Date.now();

@@ -58,7 +58,7 @@ export var Physics = {
     } else {
       Players.mainPlayer.body.speed = 0;
       Players.mainPlayer.body.angularVelocity = 0;
-      Players.mainPlayer.body.damping = 0.95;
+      Players.mainPlayer.body.damping = 0.99;
     }
 
   },
