@@ -4,7 +4,7 @@ import { Multiplayer } from './multiplayer.module.js';
 import { Physics } from './physics.module.js';
 var username = document.getElementById('username').value.substring(0,12);
 if(username.trim() === ""){
-  username = 'Unknown '+Math.floor(Math.random() * 100).toString(); 
+  username = 'Unknown '+Math.floor(Math.random() * 100).toString();
 }
 var skin = document.getElementById('skin').value;
 
@@ -56,14 +56,17 @@ var conf = {
     },
 
     render: function() {
-      let debug_text;
+      let debug_oxygen;
       if(typeof Players.mainPlayer.oxygen !== 'undefined'){
+
         if (Players.mainPlayer.oxygen <= 0) {
-          debug_text = "You are dead :( , respawn in " + (5 + Players.mainPlayer.oxygen).toString() + " seconds";
+          debug_oxygen = "You are dead :( , respawn in " + (5 + Players.mainPlayer.oxygen).toString() + " seconds";
         } else {
-          debug_text = "Oxygen : " + Players.mainPlayer.oxygen.toString();
+          debug_oxygen = "Oxygen : " + Players.mainPlayer.oxygen.toString();
         }
-        game.debug.text(debug_text, 32, 30);
+        game.debug.text(debug_oxygen, 32, 30);
+
+        game.debug.text("Best score : "+Players.mainPlayer.score.toString(), 32, 60);
       }
     },
   },

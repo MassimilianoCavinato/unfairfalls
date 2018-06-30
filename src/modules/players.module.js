@@ -15,6 +15,7 @@ export var Players = {
     player.id = playerData.id;
     player.username = { text: playerData.username, x_offset: playerData.username.length * -5, y_offset: -60};
     player.username_tag = game.add.text(0, 0, playerData.username, { font: "20px Arial", fill: "#fff"});
+    player.score = 0;
     player.skin = playerData.skin;
     player.anchor.setTo(0.5);
     game.physics.p2.enable([player], false);
@@ -51,6 +52,7 @@ export var Players = {
 
     if (Object.keys(this.mainPlayer).length > 1) {
       Physics.isInWater() ? Physics.waterPhysics() : Physics.airPhysics();
+      this.checkBestNewScore(this.mainPlayer);
       Multiplayer.socket.emit('playerAction', {
         id: this.mainPlayer.id,
         username: this.mainPlayer.username.text,
@@ -125,6 +127,13 @@ export var Players = {
     setTimeout(() => {
       player.reset(Stage.spawnPoint.x, Stage.spawnPoint.y);
     }, 5000);
+  },
 
+  checkBestNewScore: function(player){
+    let score = 16000 - player.y;
+    if(score > player.score){
+      player.score = parseInt(score);
+    }
   }
+
 }
