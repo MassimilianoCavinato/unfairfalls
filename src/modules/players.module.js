@@ -71,8 +71,8 @@ export var Players = {
   controlOther: function(playerData) {
     this.others[playerData.id].body.x = playerData.body.x,
     this.others[playerData.id].body.y = playerData.body.y,
-    this.others[playerData.id].body.velocity.x = playerData.body.velocity.x,
-    this.others[playerData.id].body.velocity.x = playerData.body.velocity.y,
+    // this.others[playerData.id].body.velocity.x = playerData.body.velocity.x,
+    // this.others[playerData.id].body.velocity.x = playerData.body.velocity.y,
     this.others[playerData.id].body.rotation = playerData.body.rotation,
     this.others[playerData.id].scale.y = playerData.scale.y;
     this.repositionUsernameTag(this.others[playerData.id]);
