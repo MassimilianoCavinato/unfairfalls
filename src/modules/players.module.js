@@ -1,4 +1,5 @@
 import { game } from './game.module.js';
+import { Stage } from './stage.module.js';
 import { Physics } from './physics.module.js';
 import { Multiplayer } from './multiplayer.module.js';
 
@@ -10,10 +11,11 @@ export var Players = {
 
   addPlayer: function(playerData, isMain) {
 
-    let player = game.add.sprite(2200, 14000, this.getRandomSkin());
+    let player = game.add.sprite(Stage.spawnPoint.x, Stage.spawnPoint.y, playerData.skin);
     player.id = playerData.id;
     player.username = { text: playerData.username, x_offset: playerData.username.length * -5, y_offset: -60};
     player.username_tag = game.add.text(0, 0, playerData.username, { font: "20px Arial", fill: "#fff"});
+    player.skin = playerData.skin;
     player.anchor.setTo(0.5);
     game.physics.p2.enable([player], false);
     player.body.clearShapes();
@@ -24,8 +26,8 @@ export var Players = {
   },
 
   setMain: function(player){
-    player.stats = { maxSpeed: 700, maxOxygen: 30, maxForce: 6500};
-    player.oxygen = 30;
+    player.stats = { maxSpeed: 700, maxOxygen: 15, maxForce: 6500};
+    player.oxygen = 15;
     player.inWater = false;
     player.timestamp = Date.now();
     player.inputEnabled = true;
@@ -36,6 +38,7 @@ export var Players = {
   },
 
   setOther: function(player){
+    player.body.data.gravityScale = 0;
     this.others[player.id] = player;
   },
   /*
@@ -47,34 +50,28 @@ export var Players = {
 
     if (Object.keys(this.mainPlayer).length > 1) {
       Physics.isInWater() ? Physics.waterPhysics() : Physics.airPhysics();
-      this.repositionUsernameTag(this.mainPlayer);
-      let state = {
+      Multiplayer.socket.emit('playerAction', {
         id: this.mainPlayer.id,
         username: this.mainPlayer.username.text,
-        body: {
-          x: this.mainPlayer.body.x,
-          y: this.mainPlayer.body.y,
-          rotation: this.mainPlayer.body.rotation,
-          velocity: {
-            x: this.mainPlayer.body.velocity.x,
-            y: this.mainPlayer.body.velocity.y
-          }
-        },
-        scale: {
-          y: this.mainPlayer.scale.y
-        },
-        timestamp: Date.now()
-      };
-      Multiplayer.socket.emit('playerAction', state);
+        skin: this.mainPlayer.skin,
+        x: this.mainPlayer.body.x,
+        y: this.mainPlayer.body.y,
+        rotation: this.mainPlayer.body.rotation,
+        v_x: this.mainPlayer.body.velocity.x,
+        v_y: this.mainPlayer.body.velocity.y,
+        scale_y: this.mainPlayer.scale.y
+      });
+
+      this.repositionUsernameTag(this.mainPlayer);
     }
   },
   controlOther: function(playerData) {
-    this.others[playerData.id].body.x = playerData.body.x,
-    this.others[playerData.id].body.y = playerData.body.y,
-    // this.others[playerData.id].body.velocity.x = playerData.body.velocity.x,
-    // this.others[playerData.id].body.velocity.x = playerData.body.velocity.y,
-    this.others[playerData.id].body.rotation = playerData.body.rotation,
-    this.others[playerData.id].scale.y = playerData.scale.y;
+    this.others[playerData.id].body.x = playerData.x;
+    this.others[playerData.id].body.y = playerData.y;
+    this.others[playerData.id].body.rotation = playerData.rotation;
+    // this.others[playerData.id].body.velocity.x = playerData.v_x;
+    // this.others[playerData.id].body.velocity.x = playerData.v_y;
+    this.others[playerData.id].scale.y = playerData.scale_y;
     this.repositionUsernameTag(this.others[playerData.id]);
   },
   /**
@@ -95,30 +92,38 @@ export var Players = {
     }
   },
 
-  controlPlayerDeath: function() {
+  decreaseOxygen: function(){
     setInterval(() => {
       this.mainPlayer.oxygen--;
-      if (this.mainPlayer.oxygen === 0) {
-        this.mainPlayer.loadTexture('dead');
-      }
-      if (this.mainPlayer.oxygen === -5) {
-
-        let deadPlayer = game.add.sprite(this.mainPlayer.body.x, this.mainPlayer.body.y, 'dead');
-        deadPlayer.anchor.setTo(0.5);
-        deadPlayer.rotation = this.mainPlayer.body.rotation;
-        this.mainPlayer.body.x = 150;
-        this.mainPlayer.body.y = 15500;
-        this.mainPlayer.loadTexture(this.getRandomSkin());
-        this.mainPlayer.oxygen = this.mainPlayer.stats.maxOxygen;
+      if(this.mainPlayer.oxygen === 0){
+        Multiplayer.socket.emit('dead', this.mainPlayer.id);
+        this.setCarcass(this.mainPlayer);
+        this.killAndRespawn(this.mainPlayer)
       }
     }, 1000);
-
   },
-  /**
-   * It makes the username tags follow the players as they move around the map
-   */
+
   repositionUsernameTag(player){
     player.username_tag.x = player.x + player.username.x_offset;
     player.username_tag.y = player.y + player.username.y_offset;
+  },
+
+  setCarcass: function(player){
+    let carcass = game.add.sprite(player.body.x, player.body.y, 'dead');
+
+    carcass.anchor.setTo(0.5);
+    carcass.rotation = player.body.rotation;
+    //clean carcass after 20 seconds
+    setTimeout(() => {
+      carcass.destroy();
+    }, 20000);
+  },
+
+  killAndRespawn: function(player){
+    player.kill();
+    setTimeout(() => {
+      player.reset(Stage.spawnPoint.x, Stage.spawnPoint.y);
+    }, 5000);
+
   }
 }

@@ -2,6 +2,12 @@ import { game } from './game.module.js';
 import { Physics } from './physics.module.js';
 
 export var Stage = {
+
+  spawnPoint: {
+    x: 200,
+    y: 15500
+  },
+
   createGround: function() {
     Physics.groundGroup = game.add.tileSprite(2000, 8000, 4000, 16000, 'transparent');
     Physics.groundGroup.anchor.setTo(0.5);
@@ -13,6 +19,7 @@ export var Stage = {
     Physics.groundGroup.body.setCollisionGroup(Physics.collisionGroup);
     Physics.groundGroup.body.collides(Physics.collisionGroup);
   },
+
   createWater: function() {
     Physics.waterGroup = game.add.physicsGroup(Phaser.Physics.P2JS);
     let waterData = game.cache.getJSON('jsonData').Water;

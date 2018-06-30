@@ -3,6 +3,11 @@ import { Players } from './players.module.js';
 import { Multiplayer } from './multiplayer.module.js';
 import { Physics } from './physics.module.js';
 var username = document.getElementById('username').value.substring(0,12);
+if(username.trim() === ""){
+  username = 'Unknown '+Math.floor(Math.random() * 100).toString(); 
+}
+var skin = document.getElementById('skin').value;
+
 document.getElementById('unfairfalls').innerHTML = '';
 
 var conf = {
@@ -32,7 +37,7 @@ var conf = {
 
     },
     create: function() {
-
+      Multiplayer.initConnection(username, skin);
       this.physics.startSystem(Phaser.Physics.P2JS);
       this.world.setBounds(0, 0, 4000, 16000);
       this.physics.p2.gravity.y = 900;
@@ -41,9 +46,7 @@ var conf = {
       this.add.tileSprite(0, 0, 4000, 16000, 'grid');
       Stage.createWater();
       Stage.createGround();
-      Multiplayer.initConnection(username);
       Multiplayer.handleSockets();
-      Players.controlPlayerDeath();
       Players.otherPlayers = this.add.physicsGroup(Phaser.Physics.P2JS);
     },
 

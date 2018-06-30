@@ -16,7 +16,7 @@ var players = {};
 
 io.on('connection', function(socket) {
   //CONNECTION
-  players[socket.id] = {id: socket.id, username: socket.handshake.query.username};
+  players[socket.id] = {id: socket.id, username: socket.handshake.query.username, skin: socket.handshake.query.skin};
   socket.emit('currentPlayers', players);
   socket.broadcast.emit('newPlayer', players[socket.id]);
   console.log('User', socket.id, 'just connected!');
@@ -31,8 +31,12 @@ io.on('connection', function(socket) {
   //ACTIONS
   socket.on('playerAction', function(playerData) {
     players[socket.id] = playerData;
-    socket.broadcast.emit('playerActionFinished', players[socket.id]);
+    socket.broadcast.emit('playerActionFinished', playerData);
   });
+
+  socket.on('dead', function(playerId) {
+    socket.broadcast.emit('dead', playerId);
+  })
 });
 
 server.listen(port, () => console.log('Server listening on port :', port));

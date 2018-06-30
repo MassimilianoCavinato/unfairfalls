@@ -4,9 +4,9 @@ export var Multiplayer = {
 
   socket: null,
 
-  initConnection: function(username) {
-    this.socket = io({query: {username: username}});
-    console.log(this.socket);
+  initConnection: function(username, skin) {
+    this.socket = io({query: {username: username, skin: skin}});
+    Players.decreaseOxygen();
   },
 
   handleSockets: function() {
@@ -28,12 +28,15 @@ export var Multiplayer = {
     });
 
     this.socket.on('disconnect', (playerId) => {
-      // otherPlayers.children[otherPlayersRef[playerId]].destroy();
-      Players.otherPlayers.children.forEach(function(otherPlayer) {
-        if (playerId === otherPlayer.id) {
-          otherPlayer.destroy();
-        }
-      });
+      let player = Players.others[playerId];
+      Players.setCarcass(player);
+      player.username_tag.destroy();
+      player.destroy();
+    });
+
+    this.socket.on('dead', (playerId) => {
+      Players.setCarcass(Players.others[playerId]);
+      Players.killAndRespawn(Players.others[playerId]);
     });
   }
 }

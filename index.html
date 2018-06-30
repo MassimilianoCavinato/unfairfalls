@@ -22,7 +22,16 @@
 </head>
 <body>
     <div id='unfairfalls'>
-      <input id="username" maxlength='12' placeholder='silly salmon'><button onclick='importMain();'>Play!</button>
+      <div id='start-menu'>
+        <input id="username" maxlength='12' placeholder='silly salmon'>
+        <select id="skin">
+          <option value='skin0'>Skin 0</option>
+          <option value='skin1'>Skin 1</option>
+          <option value='skin2'>Skin 2</option>
+          <option value='skin3'>Skin 3</option>
+        </select>
+        <button onclick='importMain();'>Play!</button>
+      </div>
     </div>
     <script type='text/javascript'>
       function importMain(){
