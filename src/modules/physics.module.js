@@ -32,7 +32,7 @@ export var Physics = {
     Players.mainPlayer.body.data.gravityScale = 0;
 
     if (pointerDistance > 100) {
-      this.controlSpriteScaleY();
+      this.controlSpriteScaleY(pointerX);
       let forceAngle = Math.atan2(pointerY - Players.mainPlayer.body.y, pointerX - Players.mainPlayer.body.x);
       Players.mainPlayer.body.force.x = Math.cos(forceAngle) * Players.mainPlayer.stats.maxForce;
       Players.mainPlayer.body.force.y = Math.sin(forceAngle) * Players.mainPlayer.stats.maxForce;
@@ -52,7 +52,7 @@ export var Physics = {
 
       Players.mainPlayer.body.rotation = Math.atan2(Players.mainPlayer.body.velocity.y, Players.mainPlayer.body.velocity.x)
     } else if (pointerDistance > 50) {
-      this.controlSpriteScaleY();
+      this.controlSpriteScaleY(pointerX);
       Players.mainPlayer.body.rotation = Math.atan2(pointerY - Players.mainPlayer.body.y, pointerX - Players.mainPlayer.body.x);
       game.physics.arcade.moveToXY(Players.mainPlayer, pointerX, pointerY, 250);
       Players.mainPlayer.body.damping = 0.99;
@@ -68,16 +68,16 @@ export var Physics = {
         AIR PHYSICS
         ========================================================================
         Player is affected by game gravity
-        He can still angle in direction of the pointer but shouldn't have any control whatsoever the direction and speed.
     */
-    let pointerDistance = Math.sqrt(Math.pow(Players.mainPlayer.pointer.worldX - Players.mainPlayer.body.x, 2) + Math.pow(Players.mainPlayer.pointer.worldY - Players.mainPlayer.body.y, 2));
+    let pointerX = game.input.activePointer.worldX * (1/game.world.scale.x);
+    let pointerY = game.input.activePointer.worldY * (1/game.world.scale.y);
     Players.mainPlayer.body.data.gravityScale = 1;
     Players.mainPlayer.body.damping = 0;
     Players.mainPlayer.body.speed = 0;
     Players.mainPlayer.scale.y = Players.mainPlayer.pointer.worldX < Players.mainPlayer.x ? -Math.abs(Players.mainPlayer.scale.y) : Math.abs(Players.mainPlayer.scale.y);
-
+    this.controlSpriteScaleY(pointerX);
   },
-  controlSpriteScaleY: function(){
-      Players.mainPlayer.scale.y = Players.mainPlayer.pointer.worldX < Players.mainPlayer.x ? -Math.abs(Players.mainPlayer.scale.y) : Math.abs(Players.mainPlayer.scale.y);
+  controlSpriteScaleY: function(pointerX){
+      Players.mainPlayer.scale.y = pointerX < Players.mainPlayer.x ? -Math.abs(Players.mainPlayer.scale.y) : Math.abs(Players.mainPlayer.scale.y);
   }
 }
