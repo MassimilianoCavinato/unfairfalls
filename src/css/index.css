@@ -11,7 +11,7 @@ body{
   left: 50%;
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
-  background: url('http://localhost:5000/assets/img/start-menu.jpg');
+  background: url('https://unfairfalls.herokuapp.com/assets/img/start-menu.jpg');
   background-size: contain;
   width: 800px;
   height: 600px;
