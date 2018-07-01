@@ -25,16 +25,17 @@ export var Physics = {
         The bigger is the distance from the pointer and the faseter he moves, up to 800 max speed
         When the pointer is close to the player, the sprite should stop smoothly and stop angling to avoid shaky animation
     */
+    let pointerX = game.input.activePointer.worldX * (1/game.world.scale.x);
+    let pointerY = game.input.activePointer.worldY * (1/game.world.scale.y);
 
-    let pointerDistance = Math.sqrt(Math.pow(Players.mainPlayer.pointer.worldX - Players.mainPlayer.body.x, 2) + Math.pow(Players.mainPlayer.pointer.worldY - Players.mainPlayer.body.y, 2));
+    let pointerDistance = Math.sqrt(Math.pow(pointerX - Players.mainPlayer.body.x, 2) + Math.pow(pointerY - Players.mainPlayer.body.y, 2));
     Players.mainPlayer.body.data.gravityScale = 0;
 
     if (pointerDistance > 100) {
       this.controlSpriteScaleY();
-      let forceAngle = Math.atan2(Players.mainPlayer.pointer.worldY - Players.mainPlayer.body.y, Players.mainPlayer.pointer.worldX - Players.mainPlayer.body.x);
+      let forceAngle = Math.atan2(pointerY - Players.mainPlayer.body.y, pointerX - Players.mainPlayer.body.x);
       Players.mainPlayer.body.force.x = Math.cos(forceAngle) * Players.mainPlayer.stats.maxForce;
       Players.mainPlayer.body.force.y = Math.sin(forceAngle) * Players.mainPlayer.stats.maxForce;
-
 
       if (Players.mainPlayer.body.velocity.y > Players.mainPlayer.stats.maxSpeed) {
         Players.mainPlayer.body.velocity.y = Players.mainPlayer.stats.maxSpeed;
@@ -52,8 +53,8 @@ export var Physics = {
       Players.mainPlayer.body.rotation = Math.atan2(Players.mainPlayer.body.velocity.y, Players.mainPlayer.body.velocity.x)
     } else if (pointerDistance > 50) {
       this.controlSpriteScaleY();
-      Players.mainPlayer.body.rotation = Math.atan2(Players.mainPlayer.pointer.worldY - Players.mainPlayer.body.y, Players.mainPlayer.pointer.worldX - Players.mainPlayer.body.x);
-      game.physics.arcade.moveToXY(Players.mainPlayer, Players.mainPlayer.pointer.worldX, Players.mainPlayer.pointer.worldY, 250);
+      Players.mainPlayer.body.rotation = Math.atan2(pointerY - Players.mainPlayer.body.y, pointerX - Players.mainPlayer.body.x);
+      game.physics.arcade.moveToXY(Players.mainPlayer, pointerX, pointerY, 250);
       Players.mainPlayer.body.damping = 0.99;
     } else {
       Players.mainPlayer.body.speed = 0;

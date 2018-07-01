@@ -35,6 +35,7 @@ export var Players = {
     player.inputEnabled = true;
     player.events.onInputDown.add(this.flap, this);
     player.pointer = game.input.activePointer;
+    player.pointer_offset = {x: game.world.width*(1 - game.camera.scale.x), y: game.world.height*(1 - game.camera.scale.y)};
     game.camera.follow(player);
     this.mainPlayer = player;
   },
@@ -52,6 +53,7 @@ export var Players = {
 
     if (Object.keys(this.mainPlayer).length > 1) {
       Physics.isInWater() ? Physics.waterPhysics() : Physics.airPhysics();
+
       this.checkBestNewScore(this.mainPlayer);
       Multiplayer.socket.emit('playerAction', {
         id: this.mainPlayer.id,

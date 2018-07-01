@@ -3,37 +3,35 @@
 <head>
     <meta charset="utf-8" name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
     <title>Unfair Falls</title>
+    <script src='/src/lib/jquery.min.js'></script>
+    <script src='/src/lib/ddslick.min.js'></script>
     <script src='/src/lib/phaser.min.js'></script>
     <script src='./socket.io/socket.io.js'></script>
-<style>
-      body{
-        margin: 0px;
-        padding: 0px;
-        background-color: black;
-      }
-      #unfairfalls{
-        position:absolute;
-        top: 50%;
-        left: 50%;
-        -webkit-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-      }
-    </style>
+    <link rel="stylesheet" href="/src/css/index.css"></link>
 </head>
 <body>
     <div id='unfairfalls'>
       <div id='start-menu'>
-        <input id="username" maxlength='12' placeholder='silly salmon'>
-        <select id="skin">
-          <option value='skin0'>Skin 0</option>
-          <option value='skin1'>Skin 1</option>
-          <option value='skin2'>Skin 2</option>
-          <option value='skin3'>Skin 3</option>
+        <input id="username" class="menu" maxlength='11' placeholder='sillysalmon'>
+        <select id="skin" class="menu">
+          <option value="skin0" data-imagesrc="https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png" data-description="Skin 0">
+            Flippy
+          </option>
+          <option value="skin1" data-imagesrc="https://unfairfalls.herokuapp.com/assets/img/skins/skin1.png" data-description="Skin 1">
+            Blacky
+          </option>
+          <option value="skin2" data-imagesrc="https://unfairfalls.herokuapp.com/assets/img/skins/skin2.png" data-description="Skin 2">
+            Parrot
+          </option>
+          <option value="skin3" data-imagesrc="https://unfairfalls.herokuapp.com/assets/img/skins/skin3.png" data-description="Skin 3">
+            Razor
+          </option>
         </select>
-        <button onclick='importMain();'>Play!</button>
+        <button id="play" class="menu" onclick='importMain();'>Play!</button>
       </div>
     </div>
     <script type='text/javascript'>
+      $('#skin').ddslick();
       function importMain(){
         let script = document.createElement("script");
         script.type = "module";

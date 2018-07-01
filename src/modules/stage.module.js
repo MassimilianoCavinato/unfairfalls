@@ -4,7 +4,7 @@ import { Physics } from './physics.module.js';
 export var Stage = {
 
   spawnPoint: {
-    x: 200,
+    x: 3500,
     y: 15600
   },
 

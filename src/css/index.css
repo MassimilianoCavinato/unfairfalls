@@ -1,0 +1,46 @@
+body{
+  margin: 0px;
+  padding: 0px;
+  background-color: black;
+  font-family: Arial;
+}
+
+#unfairfalls{
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  background: url('http://localhost:5000/assets/img/start-menu.jpg');
+  background-size: contain;
+  width: 800px;
+  height: 600px;
+}
+
+#start-menu {
+  width: 258px;
+  margin: 0 auto;
+  margin-top: 240px;
+}
+
+.menu{
+  height: 45px;
+  border-style: none;
+  border-radius: 2px;
+  border: 1px solid #bbb;
+  width: 258px;
+
+}
+#username{
+  color: #888;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#play{
+  margin-top: 10px;
+  background-color: dodgerblue;
+  color: white;
+  cursor: pointer;
+  width: 262px;
+}
