@@ -35,6 +35,7 @@ var conf = {
       this.load.physics('charactersData', 'assets/physicsData/characters.json');
 
     },
+    
     create: function() {
       Multiplayer.initConnection(username, skin);
       this.physics.startSystem(Phaser.Physics.P2JS);
@@ -77,7 +78,9 @@ var conf = {
         // game.debug.text("camera y: "+game.camera.y, 32, 210);
         // game.debug.text("Mouse distance: "+Math.sqrt(Math.pow(Players.mainPlayer.pointer.worldX*1.65 - Players.mainPlayer.body.x, 2) + Math.pow(Players.mainPlayer.pointer.worldY*1.65 - Players.mainPlayer.body.y, 2)), 32,90);
       }
-    },
+    }
+
+
   },
 };
 

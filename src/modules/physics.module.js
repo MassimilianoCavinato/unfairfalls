@@ -2,41 +2,28 @@ import { Players } from './players.module.js';
 import { game } from './game.module.js';
 
 export var Physics = {
+
   collisionGroup: {},
   waterGroup: {},
   groundGroup: {},
+  getScaledPointer: function(){
+    return {x: game.input.activePointer.worldX * (1/game.world.scale.x), y: game.input.activePointer.worldY * (1/game.world.scale.y)};
+  },
   isInWater: function() {
     return Physics.waterGroup.children.some(function(waterSprite) {
       return Players.mainPlayer.overlap(waterSprite) === true;
     });
   },
   waterPhysics: function() {
-    /*
-    I m a fish - I m supposed to breath in the water
-    */
+    let pointer = this.getScaledPointer();
     Players.restoreOxygen();
-
-    /*  ========================================================================
-        WATER PHYSICS
-        ========================================================================
-        No gravity
-        Water friction ( body.damping )
-        Player moves in direction of the pointer
-        The bigger is the distance from the pointer and the faseter he moves, up to 800 max speed
-        When the pointer is close to the player, the sprite should stop smoothly and stop angling to avoid shaky animation
-    */
-    let pointerX = game.input.activePointer.worldX * (1/game.world.scale.x);
-    let pointerY = game.input.activePointer.worldY * (1/game.world.scale.y);
-
-    let pointerDistance = Math.sqrt(Math.pow(pointerX - Players.mainPlayer.body.x, 2) + Math.pow(pointerY - Players.mainPlayer.body.y, 2));
+    let pointerDistance = Math.sqrt(Math.pow(pointer.x - Players.mainPlayer.body.x, 2) + Math.pow(pointer.y - Players.mainPlayer.body.y, 2));
     Players.mainPlayer.body.data.gravityScale = 0;
-
     if (pointerDistance > 100) {
-      this.controlSpriteScaleY(pointerX);
-      let forceAngle = Math.atan2(pointerY - Players.mainPlayer.body.y, pointerX - Players.mainPlayer.body.x);
+      this.controlSpriteScaleY(pointer);
+      let forceAngle = Math.atan2(pointer.y - Players.mainPlayer.body.y, pointer.x - Players.mainPlayer.body.x);
       Players.mainPlayer.body.force.x = Math.cos(forceAngle) * Players.mainPlayer.stats.maxForce;
       Players.mainPlayer.body.force.y = Math.sin(forceAngle) * Players.mainPlayer.stats.maxForce;
-
       if (Players.mainPlayer.body.velocity.y > Players.mainPlayer.stats.maxSpeed) {
         Players.mainPlayer.body.velocity.y = Players.mainPlayer.stats.maxSpeed;
       }
@@ -49,35 +36,33 @@ export var Physics = {
       if (Players.mainPlayer.body.velocity.x < -Players.mainPlayer.stats.maxSpeed) {
         Players.mainPlayer.body.velocity.x = -Players.mainPlayer.stats.maxSpeed;
       }
-
       Players.mainPlayer.body.rotation = Math.atan2(Players.mainPlayer.body.velocity.y, Players.mainPlayer.body.velocity.x)
     } else if (pointerDistance > 50) {
-      this.controlSpriteScaleY(pointerX);
-      Players.mainPlayer.body.rotation = Math.atan2(pointerY - Players.mainPlayer.body.y, pointerX - Players.mainPlayer.body.x);
-      game.physics.arcade.moveToXY(Players.mainPlayer, pointerX, pointerY, 250);
+      this.controlSpriteScaleY(pointer);
+      Players.mainPlayer.body.rotation = Math.atan2(pointer.y - Players.mainPlayer.body.y, pointer.x - Players.mainPlayer.body.x);
+      game.physics.arcade.moveToXY(Players.mainPlayer, pointer.x, pointer.y, 250);
       Players.mainPlayer.body.damping = 0.99;
     } else {
       Players.mainPlayer.body.speed = 0;
       Players.mainPlayer.body.angularVelocity = 0;
       Players.mainPlayer.body.damping = 0.99;
     }
-
   },
   airPhysics: function() {
-    /*  ========================================================================
-        AIR PHYSICS
-        ========================================================================
-        Player is affected by game gravity
-    */
-    let pointerX = game.input.activePointer.worldX * (1/game.world.scale.x);
-    let pointerY = game.input.activePointer.worldY * (1/game.world.scale.y);
+    let pointer = this.getScaledPointer();
     Players.mainPlayer.body.data.gravityScale = 1;
     Players.mainPlayer.body.damping = 0;
     Players.mainPlayer.body.speed = 0;
-    Players.mainPlayer.scale.y = Players.mainPlayer.pointer.worldX < Players.mainPlayer.x ? -Math.abs(Players.mainPlayer.scale.y) : Math.abs(Players.mainPlayer.scale.y);
-    this.controlSpriteScaleY(pointerX);
+    this.controlSpriteScaleY(pointer.x);
   },
-  controlSpriteScaleY: function(pointerX){
-      Players.mainPlayer.scale.y = pointerX < Players.mainPlayer.x ? -Math.abs(Players.mainPlayer.scale.y) : Math.abs(Players.mainPlayer.scale.y);
+  flap: function() {
+    let pointer = this.getScaledPointer();
+    if (Players.mainPlayer.inWater === false) {
+      Players.mainPlayer.body.angularVelocity = pointer.x > Players.mainPlayer.x ? 15 : -15;
+      Players.mainPlayer.body.velocity.y -= 50;
+    }
+  },
+  controlSpriteScaleY: function(pointer){
+      Players.mainPlayer.scale.y = pointer.x > Players.mainPlayer.x ? 1 : -1;
   }
 }

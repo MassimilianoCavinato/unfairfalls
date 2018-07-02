@@ -33,26 +33,25 @@ export var Players = {
     player.inWater = false;
     player.timestamp = Date.now();
     player.inputEnabled = true;
-    player.events.onInputDown.add(this.flap, this);
-    player.pointer = game.input.activePointer;
-    player.pointer_offset = {x: game.world.width*(1 - game.camera.scale.x), y: game.world.height*(1 - game.camera.scale.y)};
+    player.events.onInputDown.add(Physics.flap, this);
     game.camera.follow(player);
     this.mainPlayer = player;
+  },
+
+  getScaledPointer: function(){
+    return {x: game.input.activePointer.worldX * (1/game.world.scale.x), y: game.input.activePointer.worldY * (1/game.world.scale.y)};
   },
 
   setOther: function(player){
     player.body.data.gravityScale = 0;
     this.others[player.id] = player;
   },
-  /*
-      The state object below is a snapshot of the player sent with web socket which will be then broadcasted to all other players.
-      This will probably change down the line, I don't think that all this data is necessary.
-      Also, this data should be encoded client side and decoded server side to make TCP traffic faster.
-  */
+
   controlMain: function() {
 
     if (Object.keys(this.mainPlayer).length > 1) {
-      Physics.isInWater() ? Physics.waterPhysics() : Physics.airPhysics();
+      let pointer = this.getScaledPointer();
+      Physics.isInWater() ? Physics.waterPhysics(pointer) : Physics.airPhysics(pointer);
 
       this.checkBestNewScore(this.mainPlayer);
       Multiplayer.socket.emit('playerAction', {
@@ -70,32 +69,21 @@ export var Players = {
       this.repositionUsernameTag(this.mainPlayer);
     }
   },
+
   controlOther: function(playerData) {
     this.others[playerData.id].body.x = playerData.x;
     this.others[playerData.id].body.y = playerData.y;
     this.others[playerData.id].body.rotation = playerData.rotation;
-    // this.others[playerData.id].body.velocity.x = playerData.v_x;
-    // this.others[playerData.id].body.velocity.x = playerData.v_y;
+    // this.others[playerData.id].body.velocity.x = playerData.v_x; //causes stuittering
+    // this.others[playerData.id].body.velocity.x = playerData.v_y; //causes stuttering
     this.others[playerData.id].scale.y = playerData.scale_y;
     this.repositionUsernameTag(this.others[playerData.id]);
   },
-  /**
-   * When the main player is in contact with water oxygen is restored
-   */
+
   restoreOxygen: function() {
     this.mainPlayer.oxygen = this.mainPlayer.stats.maxOxygen;
   },
 
-  getRandomSkin: function() {
-    return this.skins[Math.floor(Math.random() * this.skins.length)]
-  },
-
-  flap: function() {
-    if (!Players.mainPlayer.inWater) {
-      this.mainPlayer.body.angularVelocity = this.mainPlayer.pointer.worldX > this.mainPlayer.x ? 15 : -15;
-      this.mainPlayer.body.velocity.y -= 50;
-    }
-  },
 
   decreaseOxygen: function(){
     setInterval(() => {
