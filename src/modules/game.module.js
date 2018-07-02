@@ -10,8 +10,8 @@ var skin = $('#skin').data('ddslick').selectedData.value;
 document.getElementById('unfairfalls').innerHTML = '';
 
 var conf = {
-  width: 800,
-  height: 600,
+  width: 900,
+  height: 500,
   renderer: Phaser.CANVAS,
   parent: 'unfairfalls',
   transparent: false,
@@ -35,7 +35,7 @@ var conf = {
       this.load.physics('charactersData', 'assets/physicsData/characters.json');
 
     },
-    
+
     create: function() {
       Multiplayer.initConnection(username, skin);
       this.physics.startSystem(Phaser.Physics.P2JS);
