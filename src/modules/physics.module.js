@@ -49,11 +49,11 @@ export var Physics = {
     }
   },
   airPhysics: function() {
-    let pointer = this.getScaledPointer();
+    // let pointer = this.getScaledPointer();
     Players.mainPlayer.body.data.gravityScale = 1;
     Players.mainPlayer.body.damping = 0;
     Players.mainPlayer.body.speed = 0;
-    this.controlSpriteScaleY(pointer.x);
+    // this.controlSpriteScaleY(pointer.x);
   },
   flap: function() {
     let pointer = this.getScaledPointer();
