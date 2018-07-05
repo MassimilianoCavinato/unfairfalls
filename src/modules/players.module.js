@@ -28,7 +28,7 @@ export var Players = {
   },
 
   setMain: function(player){
-    player.stats = { maxSpeed: 725, maxOxygen: 15, maxForce: 6750};
+    player.stats = { maxSpeed: 700, maxOxygen: 15, maxForce: 6750};
     player.oxygen = 15;
     player.inWater = false;
     player.timestamp = Date.now();

@@ -5,7 +5,7 @@ export var Stage = {
 
   spawnPoint: {
     x: 250,
-    y: 15800
+    y: 10000
   },
 
   createGround: function() {

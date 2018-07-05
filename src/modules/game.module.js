@@ -67,16 +67,6 @@ var conf = {
         }
         game.debug.text(debug_oxygen, 32, 30);
         game.debug.text("Best score : "+Players.mainPlayer.score.toString(), 32, 60);
-
-
-        // game.debug.pointer( game.input.activePointer );
-        // let pointerX = game.input.activePointer.worldX * (1/game.world.scale.x);
-        // let pointerY = game.input.activePointer.worldY * (1/game.world.scale.y);
-        // game.debug.text("pointer x: "+pointerX, 32, 120);
-        // game.debug.text("pointer y: "+pointerY, 32, 150);
-        // game.debug.text("camera x: "+game.camera.x, 32, 180);
-        // game.debug.text("camera y: "+game.camera.y, 32, 210);
-        // game.debug.text("Mouse distance: "+Math.sqrt(Math.pow(Players.mainPlayer.pointer.worldX*1.65 - Players.mainPlayer.body.x, 2) + Math.pow(Players.mainPlayer.pointer.worldY*1.65 - Players.mainPlayer.body.y, 2)), 32,90);
       }
     }
 

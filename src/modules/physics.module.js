@@ -60,8 +60,15 @@ export var Physics = {
   flap: function() {
     let pointer = this.getScaledPointer();
     if (Players.mainPlayer.inWater === false) {
-      Players.mainPlayer.body.angularVelocity = pointer.x > Players.mainPlayer.x ? 20 : -20;
       Players.mainPlayer.body.velocity.y -= 50;
+      if(pointer.x > Players.mainPlayer.x){
+        Players.mainPlayer.body.angularVelocity=15;
+        Players.mainPlayer.body.velocity.x+=8;
+      }
+      else{
+        Players.mainPlayer.body.angularVelocity=-15;
+        Players.mainPlayer.body.velocity.x-=8;
+      }
     }
   },
   controlSpriteScaleY: function(pointer){
