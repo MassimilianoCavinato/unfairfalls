@@ -4,8 +4,8 @@ import { Physics } from './physics.module.js';
 export var Stage = {
 
   spawnPoint: {
-    x: 250,
-    y: 10000
+    x: 3800,
+    y: 8000
   },
 
   createGround: function() {
