@@ -29,7 +29,7 @@ var conf = {
       this.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
       this.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
       this.load.image('landscape', 'https://unfairfalls.herokuapp.com/assets/img/mountain_landscape.jpg');
-
+      this.load.image('test', 'http://localhost:5000/assets/img/test.png');
       //PHYSICS DATA
       this.load.physics('mapData', 'assets/physicsData/map.json');
       this.load.json('jsonData', 'assets/physicsData/map.json');
@@ -46,8 +46,8 @@ var conf = {
       game.camera.scale.set(0.65,0.65);
       Physics.collisionGroup = this.physics.p2.createCollisionGroup();
       Stage.createGrid();
-      // Stage.createLandscape();
       Stage.createWater();
+      Stage.createLandscape();
       Stage.createGround();
       Multiplayer.handleSockets();
       Players.otherPlayers = this.add.physicsGroup(Phaser.Physics.P2JS);

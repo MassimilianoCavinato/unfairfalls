@@ -13,14 +13,16 @@ export var Stage = {
   },
 
   createLandscape: function() {
-    let camera_landscape = game.add.tileSprite(0, 0, game.camera.width * (1 + game.camera.scale.x), game.camera.height * (1 + game.camera.scale.y), 'landscape');
-    camera_landscape.fixedToCamera = true;
+    let landscape = game.add.tileSprite(0, 0, 1000, 4000, 'test');
+    landscape.scale.setTo(4, 4);
+    // let camera_landscape = game.add.tileSprite(0, 0, game.camera.width * (1 + game.camera.scale.x), game.camera.height * (1 + game.camera.scale.y), 'landscape');
+    // camera_landscape.fixedToCamera = true;
   },
 
   createGround: function() {
     Physics.groundGroup = game.add.tileSprite(2000, 8000, 4000, 16000, 'transparent');
     Physics.groundGroup.anchor.setTo(0.5);
-    game.physics.p2.enable([Physics.groundGroup], true);
+    game.physics.p2.enable([Physics.groundGroup], false);
     Physics.groundGroup.body.clearShapes();
     Physics.groundGroup.body.loadPolygon('mapData', 'Ground');
     Physics.groundGroup.body.data.gravityScale = 0;
