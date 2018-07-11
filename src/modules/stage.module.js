@@ -5,7 +5,16 @@ export var Stage = {
 
   spawnPoint: {
     x: 200,
-    y: 15750
+    y: 7750
+  },
+
+  createGrid: function() {
+    game.add.tileSprite(0, 0, 4000, 16000, 'grid');
+  },
+
+  createLandscape: function() {
+    let camera_landscape = game.add.tileSprite(0, 0, game.camera.width * (1 + game.camera.scale.x), game.camera.height * (1 + game.camera.scale.y), 'landscape');
+    camera_landscape.fixedToCamera = true;
   },
 
   createGround: function() {

@@ -10,23 +10,28 @@ export var Multiplayer = {
   },
 
   handleSockets: function() {
-      this.socket.on('currentPlayers', (players) => {
-        Object.values(players).forEach((playerData) => {
-          let isMain = playerData.id == this.socket.id;
-          Players.addPlayer(playerData, isMain);
-        });
-      });
 
+    //CURRENT PLAYERS
+    this.socket.on('currentPlayers', (players) => {
+      Object.values(players).forEach((playerData) => {
+        let isMain = playerData.id == this.socket.id;
+        Players.addPlayer(playerData, isMain);
+      });
+    });
+
+    //NEW PLAYER
+    this.socket.on('newPlayer', (playerData) => {
+      Players.addPlayer(playerData, false);
+    });
+
+    //PLAYER ACTION FINISHED
     this.socket.on('playerActionFinished', (playerData) => {
       if (playerData.id !== this.socket.id) {
         Players.controlOther(playerData);
       }
     });
 
-    this.socket.on('newPlayer', (playerData) => {
-      Players.addPlayer(playerData, false);
-    });
-
+    //DISCONNECT
     this.socket.on('disconnect', (playerId) => {
       let player = Players.others[playerId];
       Players.setCarcass(player);
@@ -34,6 +39,7 @@ export var Multiplayer = {
       player.destroy();
     });
 
+    //DEAD
     this.socket.on('dead', (playerId) => {
       Players.setCarcass(Players.others[playerId]);
       Players.killAndRespawn(Players.others[playerId]);

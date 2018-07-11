@@ -15,6 +15,7 @@ app.use('/assets', express.static(__dirname + '/assets'));
 var players = {};
 
 io.on('connection', function(socket) {
+
   //CONNECTION
   players[socket.id] = {id: socket.id, username: socket.handshake.query.username, skin: socket.handshake.query.skin};
   socket.emit('currentPlayers', players);

@@ -28,6 +28,7 @@ var conf = {
       this.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
       this.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
       this.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
+      this.load.image('landscape', 'https://unfairfalls.herokuapp.com/assets/img/mountain_landscape.jpg');
 
       //PHYSICS DATA
       this.load.physics('mapData', 'assets/physicsData/map.json');
@@ -44,7 +45,8 @@ var conf = {
       this.stage.disableVisibilityChange = true;
       game.camera.scale.set(0.65,0.65);
       Physics.collisionGroup = this.physics.p2.createCollisionGroup();
-      this.add.tileSprite(0, 0, 4000, 16000, 'grid');
+      Stage.createGrid();
+      // Stage.createLandscape();
       Stage.createWater();
       Stage.createGround();
       Multiplayer.handleSockets();
@@ -57,7 +59,9 @@ var conf = {
     },
 
     render: function() {
+
       let debug_oxygen;
+
       if(typeof Players.mainPlayer.oxygen !== 'undefined'){
 
         if (Players.mainPlayer.oxygen <= 0) {

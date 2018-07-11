@@ -6,14 +6,17 @@ export var Physics = {
   collisionGroup: {},
   waterGroup: {},
   groundGroup: {},
+
   getScaledPointer: function(){
     return {x: game.input.activePointer.worldX * (1/game.world.scale.x), y: game.input.activePointer.worldY * (1/game.world.scale.y)};
   },
+
   isInWater: function() {
     return Physics.waterGroup.children.some(function(waterSprite) {
       return Players.mainPlayer.overlap(waterSprite) === true;
     });
   },
+
   waterPhysics: function() {
     Players.restoreOxygen();
     Players.mainPlayer.body.damping = 0.85;
@@ -49,14 +52,15 @@ export var Physics = {
         Players.mainPlayer.body.angularVelocity = 0;
       }
     }
-
   },
+
   airPhysics: function() {
     Players.mainPlayer.body.data.gravityScale = 1;
     Players.mainPlayer.body.damping = 0;
     Players.mainPlayer.body.angularDamping = 0;
     Players.mainPlayer.body.speed = 0;
   },
+
   flap: function() {
     let pointer = this.getScaledPointer();
     if (Players.mainPlayer.inWater === false) {
@@ -71,6 +75,7 @@ export var Physics = {
       }
     }
   },
+  
   controlSpriteScaleY: function(pointer){
       Players.mainPlayer.scale.y = pointer.x > Players.mainPlayer.x ? 1 : -1;
   }

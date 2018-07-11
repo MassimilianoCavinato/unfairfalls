@@ -1,4 +1,3 @@
-- make game config require
-- fish flopping
-- fix forceSetTimeout on chrome
-- start menu
+- spikes, kill immediately
+- multiplayer leaderboard
+- complete debug map
