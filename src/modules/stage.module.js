@@ -13,8 +13,8 @@ export var Stage = {
   },
 
   createLandscape: function() {
-    let landscape = game.add.tileSprite(0, 0, 1000, 4000, 'test');
-    landscape.scale.setTo(4, 4);
+    let landscape = game.add.tileSprite(0, 0, 2000, 8000, 'test');
+    landscape.scale.setTo(2, 2);
     // let camera_landscape = game.add.tileSprite(0, 0, game.camera.width * (1 + game.camera.scale.x), game.camera.height * (1 + game.camera.scale.y), 'landscape');
     // camera_landscape.fixedToCamera = true;
   },
