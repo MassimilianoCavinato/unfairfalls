@@ -18,8 +18,7 @@ var conf = {
   antialias: true,
   state: {
     preload: function() {
-
-      //IMAGE DATA
+      this.load.image('test', 'https://unfairfalls.herokuapp.com/assets/img/test.png');
       this.load.image('skin0', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png');
       this.load.image('skin1', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin1.png');
       this.load.image('skin2', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin2.png');
@@ -29,14 +28,11 @@ var conf = {
       this.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
       this.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
       this.load.image('landscape', 'https://unfairfalls.herokuapp.com/assets/img/mountain_landscape.jpg');
-      this.load.image('test', 'https://unfairfalls.herokuapp.com/assets/img/test.png');
-      //PHYSICS DATA
       this.load.physics('mapData', 'assets/physicsData/map.json');
       this.load.json('jsonData', 'assets/physicsData/map.json');
       this.load.physics('charactersData', 'assets/physicsData/characters.json');
 
     },
-
     create: function() {
       Multiplayer.initConnection(username, skin);
       this.physics.startSystem(Phaser.Physics.P2JS);
@@ -52,12 +48,10 @@ var conf = {
       Multiplayer.handleSockets();
       Players.otherPlayers = this.add.physicsGroup(Phaser.Physics.P2JS);
     },
-
     update: function() {
       //should find a way to remove this check at each update
       return typeof (Players.mainPlayer) !== 'undefined' ? Players.controlMain() : null;
     },
-
     render: function() {
 
       let debug_oxygen;
