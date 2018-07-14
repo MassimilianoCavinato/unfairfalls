@@ -28,7 +28,6 @@ var conf = {
       this.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
       this.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
       this.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
-      this.load.image('landscape', 'https://unfairfalls.herokuapp.com/assets/img/mountain_landscape.jpg');
       this.load.physics('mapData', 'assets/physicsData/map.json');
       this.load.json('jsonData', 'assets/physicsData/map.json');
       this.load.physics('charactersData', 'assets/physicsData/characters.json');

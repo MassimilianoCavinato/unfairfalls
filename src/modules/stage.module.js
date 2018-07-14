@@ -14,9 +14,7 @@ export var Stage = {
 
   createLandscape: function() {
     let landscape = game.add.tileSprite(0, 0, 4000, 16000, 'test');
-    landscape.scale.setTo(4, 4);
-    // let camera_landscape = game.add.tileSprite(0, 0, game.camera.width * (1 + game.camera.scale.x), game.camera.height * (1 + game.camera.scale.y), 'landscape');
-    // camera_landscape.fixedToCamera = true;
+    landscape.scale.setTo(2,2);
   },
 
   createGround: function() {
