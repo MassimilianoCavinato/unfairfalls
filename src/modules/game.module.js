@@ -16,6 +16,7 @@ var conf = {
   parent: 'unfairfalls',
   transparent: false,
   antialias: true,
+  scaleMode: Phaser.ScaleManager.EXACT_FIT,
   state: {
     preload: function() {
       this.load.image('test', 'https://unfairfalls.herokuapp.com/assets/img/test.png');
@@ -34,12 +35,13 @@ var conf = {
 
     },
     create: function() {
+
       Multiplayer.initConnection(username, skin);
       this.physics.startSystem(Phaser.Physics.P2JS);
       this.world.setBounds(0, 0, 4000, 16000);
       this.physics.p2.gravity.y = 900;
       this.stage.disableVisibilityChange = true;
-      game.camera.scale.set(0.65,0.65);
+      game.camera.scale.set(0.6,0.6);
       Physics.collisionGroup = this.physics.p2.createCollisionGroup();
       Stage.createGrid();
       Stage.createWater();

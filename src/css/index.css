@@ -3,36 +3,36 @@ body{
   padding: 0px;
   background-color: black;
   font-family: Arial;
+  height: 100%;
 }
 
 #unfairfalls{
-  position:absolute;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
   background: url('https://unfairfalls.herokuapp.com/assets/img/start-menu.jpg');
   background-size: cover;
-  width: 900px;
-  height: 500px;
 }
 
 #start-menu {
-  width: 258px;
-  margin: 0 auto;
-  margin-top: 240px;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .menu{
-  height: 45px;
+  height: 40px;
   border-style: none;
   border-radius: 2px;
   border: 1px solid #bbb;
   width: 258px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: Arial;
 
 }
 #username{
-  color: #888;
   text-align: center;
   margin-bottom: 10px;
 }
@@ -43,4 +43,22 @@ body{
   color: white;
   cursor: pointer;
   width: 262px;
+}
+
+.dd-select{
+  height: 40px;
+}
+
+.dd-selected{
+  background-color: white;
+}
+
+.dd-selected-text{
+  padding-left: 20px;
+  line-height: 0px !important;
+}
+
+.dd-option-text{
+  padding-left: 20px;
+  line-height: 0px !important;
 }
