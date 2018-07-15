@@ -9,7 +9,8 @@ export var Stage = {
   },
 
   createGrid: function() {
-    game.add.tileSprite(0, 0, 4000, 16000, 'grid');
+    game.stage.backgroundColor = "#66a3ff";
+    // game.add.tileSprite(0, 0, 4000, 16000, 'grid');
   },
 
   createLandscape: function() {
