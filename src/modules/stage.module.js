@@ -5,7 +5,7 @@ export var Stage = {
 
   spawnPoint: {
     x: 200,
-    y: 7750
+    y: 15500
   },
 
   createGrid: function() {
@@ -13,8 +13,8 @@ export var Stage = {
   },
 
   createLandscape: function() {
-    let landscape = game.add.tileSprite(0, 0, 4000, 16000, 'test');
-    landscape.scale.setTo(2,2);
+    let landscape = game.add.tileSprite(0, 0, 4000, 16000, 'map1');
+    landscape.scale.setTo(4,4);
   },
 
   createGround: function() {

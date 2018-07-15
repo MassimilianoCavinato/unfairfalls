@@ -19,15 +19,15 @@ var conf = {
   scaleMode: Phaser.ScaleManager.EXACT_FIT,
   state: {
     preload: function() {
-      this.load.image('test', 'https://unfairfalls.herokuapp.com/assets/img/test.png');
-      this.load.image('skin0', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin0.png');
-      this.load.image('skin1', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin1.png');
-      this.load.image('skin2', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin2.png');
-      this.load.image('skin3', 'https://unfairfalls.herokuapp.com/assets/img/skins/skin3.png');
-      this.load.image('dead', 'https://unfairfalls.herokuapp.com/assets/img/skins/dead.png');
-      this.load.image('transparent', 'https://unfairfalls.herokuapp.com/assets/img/transparent.png');
-      this.load.image('water', 'https://unfairfalls.herokuapp.com/assets/img/water.png');
-      this.load.image('grid', 'https://unfairfalls.herokuapp.com/assets/img/grid.png');
+      this.load.image('map1', 'assets/img/map1.png');
+      this.load.image('skin0', 'assets/img/skins/skin0.png');
+      this.load.image('skin1', 'assets/img/skins/skin1.png');
+      this.load.image('skin2', 'assets/img/skins/skin2.png');
+      this.load.image('skin3', 'assets/img/skins/skin3.png');
+      this.load.image('dead', 'assets/img/skins/dead.png');
+      this.load.image('transparent', 'assets/img/transparent.png');
+      this.load.image('water', 'assets/img/water.png');
+      this.load.image('grid', 'assets/img/grid.png');
       this.load.physics('mapData', 'assets/physicsData/map.json');
       this.load.json('jsonData', 'assets/physicsData/map.json');
       this.load.physics('charactersData', 'assets/physicsData/characters.json');
@@ -40,7 +40,7 @@ var conf = {
       this.world.setBounds(0, 0, 4000, 16000);
       this.physics.p2.gravity.y = 900;
       this.stage.disableVisibilityChange = true;
-      game.camera.scale.set(0.6,0.6);
+      game.camera.scale.set(0.7,0.7);
       Physics.collisionGroup = this.physics.p2.createCollisionGroup();
       Stage.createGrid();
       Stage.createWater();
@@ -65,11 +65,12 @@ var conf = {
           debug_oxygen = "Oxygen : " + Players.mainPlayer.oxygen.toString();
         }
         game.debug.text(debug_oxygen, 32, 30);
+
+      }
+      if(typeof Players.mainPlayer.score !== 'undefined'){
         game.debug.text("Best score : "+Players.mainPlayer.score.toString(), 32, 60);
       }
     }
-
-
   },
 };
 
